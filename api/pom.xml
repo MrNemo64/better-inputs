@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>better-inputs</artifactId>
+        <groupId>me.nemo_64</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.nemo_64</groupId>
-    <artifactId>better-inputs</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>api</module>
-    </modules>
+    <groupId>me.nemo_64.better-inputs</groupId>
+    <artifactId>api</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
