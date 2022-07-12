@@ -1,6 +1,5 @@
 package me.nemo_64.better_inputs;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -10,21 +9,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface InputProcess<S extends InputProcessSender<?>, V> {
 
-    boolean queue(InputProcessManager manager);
-
-    boolean cancel();
-
-    default boolean isRunning() {
-        return getState() == InputProcessState.RUNNING;
-    }
-
-    default boolean isFinished() {
-        return getState() == InputProcessState.FINISHED;
-    }
+    InputProcessRunner getRunner();
 
     S getSender();
-
-    Optional<InputProcessManager> getManager();
 
     CompletableFuture<V> getValue();
 
