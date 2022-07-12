@@ -1,7 +1,6 @@
 package me.nemo_64.better_inputs;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V> implements InputProcess<S, V> {
@@ -13,7 +12,6 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
     protected final InputProcessPriority processPriority;
 
     protected InputProcessState state = InputProcessState.CREATED;
-    protected Optional<InputProcessManager> manager = Optional.empty();
 
     protected AbstractInputProcess(S sender, InputProcessListener<I> listener, InputProcessPriority processPriority) {
         this.listener = Objects.requireNonNull(listener);
@@ -30,7 +28,7 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
     protected abstract void onStart();
 
     protected void linkInputProcessListener() {
-        this.listener.linkInputProcess(this::acceptInput, this::failProcess);
+        this.listener.linkInputProcess(this::acceptInput, this::failProcess, this);
     }
 
     protected void acceptInput(I input) {
@@ -54,39 +52,6 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
     }
 
     @Override
-    public boolean queue(InputProcessManager manager) {
-        if (state != InputProcessState.CREATED)
-            throw new IllegalStateException("Attempted to queue an input process but its state is " + getState());
-        Objects.requireNonNull(manager);
-        this.manager = Optional.of(manager);
-        if (! manager.queueProcess(this, this::onStartCallback))
-            return false;
-        this.state = InputProcessState.QUEUED;
-        listener.onQueued();
-        return true;
-    }
-
-    @Override
-    public boolean cancel() {
-        if (getState() == InputProcessState.QUEUED) {
-            if (! getManager().isPresent())
-                throw new IllegalStateException("The input process is queued but has no assigned manager");
-            if (getManager().get().unqueueProcess(this)) {
-                listener.onCancel();
-                state = InputProcessState.CREATED;
-                return true;
-            }
-            return false;
-        } else if (getState() == InputProcessState.RUNNING) {
-            if (! getManager().isPresent())
-                throw new IllegalStateException("The input process is running but has no assigned manager");
-            failProcess(InputProcessFailureReason.CANCELLED);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public S getSender() {
         return sender;
     }
@@ -102,7 +67,12 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
     }
 
     @Override
-    public Optional<InputProcessManager> getManager() {
-        return manager;
+    public boolean equals(Object o) {
+        return this == o;
+    }
+
+    @Override
+    public int hashCode() {
+        return getSender().hashCode();
     }
 }
