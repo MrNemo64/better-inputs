@@ -23,7 +23,6 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
 
     /**
      * Code to run when the input process starts
-     * @return
      */
     protected abstract void onStart();
 
@@ -39,16 +38,6 @@ public abstract class AbstractInputProcess<S extends InputProcessSender<?>, I, V
         if (reason == null)
             reason = InputProcessFailureReason.UNKNOWN;
         // TODO
-    }
-
-    /**
-     * @return true if the process was able to start
-     */
-    protected boolean onStartCallback() {
-        if (getState() != InputProcessState.QUEUED)
-            throw new IllegalStateException("The start callback was invoked but the input process state is not queued");
-        state = InputProcessState.RUNNING;
-        return false;
     }
 
     @Override
