@@ -3,7 +3,7 @@ package me.nemo_64.betterinputs.api.util.argument;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
+final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
 
     private final Object lock = new Object();
 
