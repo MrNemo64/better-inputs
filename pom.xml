@@ -8,6 +8,7 @@
     <version>0.1.0</version>
     <modules>
         <module>api</module>
+        <module>bukkit</module>
     </modules>
 
     <properties>
