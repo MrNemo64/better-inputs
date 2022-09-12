@@ -75,6 +75,18 @@ public final class InputProvider<V> {
         return Optional.empty();
     }
 
+    public boolean hasModifier(Class<? extends AbstractModifier> modifierType) {
+        if (modifierType == null) {
+            return false;
+        }
+        for (Class<?> clazz : modifiers.keySet()) {
+            if (modifierType.isAssignableFrom(clazz)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public InputProvider<V> withModifierExceptionHandler(BiConsumer<AbstractModifier, Throwable> modifierExceptionHandler) {
         this.modifierExceptionHandler = modifierExceptionHandler;
         return this;
