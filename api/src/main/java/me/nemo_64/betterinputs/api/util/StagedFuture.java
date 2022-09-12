@@ -246,10 +246,11 @@ public final class StagedFuture<V> {
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<Void> fire(int mode) {
+            Consumer<? super F> cons;
             StagedFuture<F> prev;
             StagedFuture<Void> nx;
             Object res;
-            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || consumer == null) {
+            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || (cons = consumer) == null) {
                 return null;
             }
             complete:
@@ -266,7 +267,7 @@ public final class StagedFuture<V> {
                 if (mode <= 0 && !claim()) {
                     return null;
                 }
-                consumer.accept((F) res);
+                cons.accept((F) res);
                 nx.internalComplete(null);
             } catch (Throwable throwable) {
                 nx.internalComplete(new Result(throwable));
@@ -334,10 +335,11 @@ public final class StagedFuture<V> {
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<T> fire(int mode) {
+            Function<? super F, ? super T> func;
             StagedFuture<F> prev;
             StagedFuture<T> nx;
             Object res;
-            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || function == null) {
+            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || (func = function) == null) {
                 return null;
             }
             complete:
@@ -354,7 +356,7 @@ public final class StagedFuture<V> {
                 if (mode <= 0 && !claim()) {
                     return null;
                 }
-                nx.internalComplete(function.apply((F) res));
+                nx.internalComplete(func.apply((F) res));
             } catch (Throwable throwable) {
                 nx.internalComplete(new Result(throwable));
             }
@@ -406,13 +408,36 @@ public final class StagedFuture<V> {
         return applyStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
     }
 
-    // ApplyFlat Stage
+    // Compose Stage
 
-    private static final class ApplyFlatStage<F, T> extends Stage<F, T> {
+    private static final class RelayStage<F, T extends F> extends Stage<F, T> {
+
+        RelayStage(StagedFuture<F> previous, StagedFuture<T> next) {
+            super(null, previous, next);
+        }
+
+        @Override
+        StagedFuture<T> fire(int mode) {
+            StagedFuture<F> prev;
+            StagedFuture<T> nx;
+            Object res;
+            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null) {
+                return null;
+            }
+            if (nx.result == null)
+                nx.internalComplete(res);
+            previous = null;
+            next = null;
+            return null;
+        }
+
+    }
+
+    private static final class ComposeStage<F, T> extends Stage<F, T> {
 
         private Function<? super F, StagedFuture<T>> function;
 
-        ApplyFlatStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, StagedFuture<T>> function) {
+        ComposeStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, StagedFuture<T>> function) {
             super(executor, previous, next);
             this.function = function;
         }
@@ -420,13 +445,13 @@ public final class StagedFuture<V> {
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<T> fire(int mode) {
+            Function<? super F, StagedFuture<T>> func;
             StagedFuture<F> prev;
-            StagedFuture<T> snx;
+            StagedFuture<T> nx;
             Object res;
-            if ((prev = previous) == null || (snx = next) == null || (res = prev.result) == null || function == null) {
+            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || (func = function) == null) {
                 return null;
             }
-            StagedFuture<T> nx = snx;
             complete:
             if (previous.result == null) {
                 if (res instanceof Result) {
@@ -441,22 +466,27 @@ public final class StagedFuture<V> {
                 if (mode <= 0 && !claim()) {
                     return null;
                 }
-                nx = function.apply((F) res);
+                StagedFuture<T> relayed = func.apply((F) res);
+                if ((res = relayed.result) != null) {
+                    next.internalComplete(res);
+                } else {
+                    relayed.pushNewStage(new RelayStage<>(nx, relayed));
+                    if (nx.result == null) {
+                        return null;
+                    }
+                }
             } catch (Throwable throwable) {
                 nx.internalComplete(new Result(throwable));
             }
             previous = null;
             next = null;
             function = null;
-            if (snx != nx) {
-                return nx;
-            }
-            return snx.postFire(prev, mode);
+            return nx.postFire(prev, mode);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <E> StagedFuture<E> applyFlatStageNow(Object res, Executor executor, Function<? super V, StagedFuture<E>> function) {
+    private <E> StagedFuture<E> composeStageNow(Object res, Executor executor, Function<? super V, StagedFuture<E>> function) {
         StagedFuture<E> future = new StagedFuture<>();
         if (res instanceof Result) {
             if (((Result) res).throwable != null) {
@@ -467,7 +497,7 @@ public final class StagedFuture<V> {
         }
         try {
             if (executor != null) {
-                executor.execute(new ApplyFlatStage<>(null, this, future, function));
+                executor.execute(new ComposeStage<>(null, this, future, function));
                 return future;
             }
             future.result = function.apply((V) res);
@@ -477,23 +507,23 @@ public final class StagedFuture<V> {
         return future;
     }
 
-    private <E> StagedFuture<E> applyFlatStage(Executor executor, Function<? super V, StagedFuture<E>> function) {
+    private <E> StagedFuture<E> composeStage(Executor executor, Function<? super V, StagedFuture<E>> function) {
         Objects.requireNonNull(function, "Consumer can't be null");
         Object res;
         if ((res = result) != null) {
-            return applyFlatStageNow(res, executor, function);
+            return composeStageNow(res, executor, function);
         }
         StagedFuture<E> future = new StagedFuture<>();
-        pushNewStage(new ApplyFlatStage<>(executor, this, future, function));
+        pushNewStage(new ComposeStage<>(executor, this, future, function));
         return future;
     }
 
-    public <E> StagedFuture<E> thenApplyFlat(Function<? super V, StagedFuture<E>> function) {
-        return applyFlatStage(null, function);
+    public <E> StagedFuture<E> thenComposeFlat(Function<? super V, StagedFuture<E>> function) {
+        return composeStage(null, function);
     }
 
-    public <E> StagedFuture<E> thenApplyFlatAsync(Executor executor, Function<? super V, StagedFuture<E>> function) {
-        return applyFlatStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
+    public <E> StagedFuture<E> thenComposeAsync(Executor executor, Function<? super V, StagedFuture<E>> function) {
+        return composeStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
     }
 
     // VarHandle mechanics
