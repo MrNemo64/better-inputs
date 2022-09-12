@@ -1,5 +1,7 @@
 package me.nemo_64.betterinputs.api.input;
 
+import me.nemo_64.betterinputs.api.future.StagedFuture;
+
 public abstract class AbstractInput<V> {
 
     private final StagedFuture<V> future = new StagedFuture<>();

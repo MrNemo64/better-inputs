@@ -1,4 +1,4 @@
-package me.nemo_64.betterinputs.api.input;
+package me.nemo_64.betterinputs.api.future;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -6,9 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
-import me.nemo_64.betterinputs.api.future.IStagedFuture;
-
-public final class StagedFuture<V> implements IStagedFuture<V> {
+public final class StagedFuture<V> {
 
     private static final Result EMPTY = new Result(null);
 
@@ -248,7 +246,7 @@ public final class StagedFuture<V> implements IStagedFuture<V> {
     }
 
     @SuppressWarnings("unchecked")
-    private IStagedFuture<Void> acceptStageNow(Object res, Executor executor, Consumer<? super V> consumer) {
+    private StagedFuture<Void> acceptStageNow(Object res, Executor executor, Consumer<? super V> consumer) {
         StagedFuture<Void> future = new StagedFuture<>();
         if (res instanceof Result) {
             if (((Result) res).throwable != null) {
@@ -270,7 +268,7 @@ public final class StagedFuture<V> implements IStagedFuture<V> {
         return future;
     }
 
-    private IStagedFuture<Void> acceptStage(Executor executor, Consumer<? super V> consumer) {
+    private StagedFuture<Void> acceptStage(Executor executor, Consumer<? super V> consumer) {
         Objects.requireNonNull(consumer, "Consumer can't be null");
         Object res;
         if ((res = result) != null) {
@@ -281,13 +279,11 @@ public final class StagedFuture<V> implements IStagedFuture<V> {
         return future;
     }
 
-    @Override
-    public IStagedFuture<Void> thenAccept(Consumer<? super V> consumer) {
+    public StagedFuture<Void> thenAccept(Consumer<? super V> consumer) {
         return acceptStage(null, consumer);
     }
 
-    @Override
-    public IStagedFuture<Void> thenAcceptAsync(Executor executor, Consumer<? super V> consumer) {
+    public StagedFuture<Void> thenAcceptAsync(Executor executor, Consumer<? super V> consumer) {
         return acceptStage(Objects.requireNonNull(executor, "Executor can't be null"), consumer);
     }
 
