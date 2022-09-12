@@ -3,9 +3,7 @@ package me.nemo_64.betterinputs.api.input;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 import me.nemo_64.betterinputs.api.future.IStagedFuture;
