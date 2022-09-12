@@ -5,6 +5,7 @@ import java.lang.invoke.VarHandle;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class StagedFuture<V> {
 
@@ -78,6 +79,14 @@ public final class StagedFuture<V> {
 
     public final boolean isComplete() {
         return result != null;
+    }
+
+    public final boolean isEmpty() {
+        return result == null || (((result instanceof Result) && ((Result) result).throwable == null));
+    }
+
+    public final boolean isPresent() {
+        return !isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -309,6 +318,182 @@ public final class StagedFuture<V> {
 
     public StagedFuture<Void> thenAcceptAsync(Executor executor, Consumer<? super V> consumer) {
         return acceptStage(Objects.requireNonNull(executor, "Executor can't be null"), consumer);
+    }
+
+    // Apply Stage
+
+    private static final class ApplyStage<F, T> extends Stage<F, T> {
+
+        private Function<? super F, ? super T> function;
+
+        ApplyStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, ? super T> function) {
+            super(executor, previous, next);
+            this.function = function;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        StagedFuture<T> fire(int mode) {
+            StagedFuture<F> prev;
+            StagedFuture<T> nx;
+            Object res;
+            if ((prev = previous) == null || (nx = next) == null || (res = prev.result) == null || function == null) {
+                return null;
+            }
+            complete:
+            if (previous.result == null) {
+                if (res instanceof Result) {
+                    if (((Result) res).throwable != null) {
+                        nx.internalComplete(res);
+                        break complete;
+                    }
+                    res = null;
+                }
+            }
+            try {
+                if (mode <= 0 && !claim()) {
+                    return null;
+                }
+                nx.internalComplete(function.apply((F) res));
+            } catch (Throwable throwable) {
+                nx.internalComplete(new Result(throwable));
+            }
+            previous = null;
+            next = null;
+            function = null;
+            return nx.postFire(prev, mode);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E> StagedFuture<E> applyStageNow(Object res, Executor executor, Function<? super V, ? super E> function) {
+        StagedFuture<E> future = new StagedFuture<>();
+        if (res instanceof Result) {
+            if (((Result) res).throwable != null) {
+                future.result = res;
+                return future;
+            }
+            res = null;
+        }
+        try {
+            if (executor != null) {
+                executor.execute(new ApplyStage<>(null, this, future, function));
+                return future;
+            }
+            future.result = function.apply((V) res);
+        } catch (Throwable throwable) {
+            future.result = new Result(throwable);
+        }
+        return future;
+    }
+
+    private <E> StagedFuture<E> applyStage(Executor executor, Function<? super V, ? super E> function) {
+        Objects.requireNonNull(function, "Consumer can't be null");
+        Object res;
+        if ((res = result) != null) {
+            return applyStageNow(res, executor, function);
+        }
+        StagedFuture<E> future = new StagedFuture<>();
+        pushNewStage(new ApplyStage<>(executor, this, future, function));
+        return future;
+    }
+
+    public <E> StagedFuture<E> thenApply(Function<? super V, ? super E> function) {
+        return applyStage(null, function);
+    }
+
+    public <E> StagedFuture<E> thenApplyAsync(Executor executor, Function<? super V, ? super E> function) {
+        return applyStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
+    }
+
+    // ApplyFlat Stage
+
+    private static final class ApplyFlatStage<F, T> extends Stage<F, T> {
+
+        private Function<? super F, StagedFuture<T>> function;
+
+        ApplyFlatStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, StagedFuture<T>> function) {
+            super(executor, previous, next);
+            this.function = function;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        StagedFuture<T> fire(int mode) {
+            StagedFuture<F> prev;
+            StagedFuture<T> snx;
+            Object res;
+            if ((prev = previous) == null || (snx = next) == null || (res = prev.result) == null || function == null) {
+                return null;
+            }
+            StagedFuture<T> nx = snx;
+            complete:
+            if (previous.result == null) {
+                if (res instanceof Result) {
+                    if (((Result) res).throwable != null) {
+                        nx.internalComplete(res);
+                        break complete;
+                    }
+                    res = null;
+                }
+            }
+            try {
+                if (mode <= 0 && !claim()) {
+                    return null;
+                }
+                nx = function.apply((F) res);
+            } catch (Throwable throwable) {
+                nx.internalComplete(new Result(throwable));
+            }
+            previous = null;
+            next = null;
+            function = null;
+            if (snx != nx) {
+                return nx;
+            }
+            return snx.postFire(prev, mode);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E> StagedFuture<E> applyFlatStageNow(Object res, Executor executor, Function<? super V, StagedFuture<E>> function) {
+        StagedFuture<E> future = new StagedFuture<>();
+        if (res instanceof Result) {
+            if (((Result) res).throwable != null) {
+                future.result = res;
+                return future;
+            }
+            res = null;
+        }
+        try {
+            if (executor != null) {
+                executor.execute(new ApplyFlatStage<>(null, this, future, function));
+                return future;
+            }
+            future.result = function.apply((V) res);
+        } catch (Throwable throwable) {
+            future.result = new Result(throwable);
+        }
+        return future;
+    }
+
+    private <E> StagedFuture<E> applyFlatStage(Executor executor, Function<? super V, StagedFuture<E>> function) {
+        Objects.requireNonNull(function, "Consumer can't be null");
+        Object res;
+        if ((res = result) != null) {
+            return applyFlatStageNow(res, executor, function);
+        }
+        StagedFuture<E> future = new StagedFuture<>();
+        pushNewStage(new ApplyFlatStage<>(executor, this, future, function));
+        return future;
+    }
+
+    public <E> StagedFuture<E> thenApplyFlat(Function<? super V, StagedFuture<E>> function) {
+        return applyFlatStage(null, function);
+    }
+
+    public <E> StagedFuture<E> thenApplyFlatAsync(Executor executor, Function<? super V, StagedFuture<E>> function) {
+        return applyFlatStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
     }
 
     // VarHandle mechanics
