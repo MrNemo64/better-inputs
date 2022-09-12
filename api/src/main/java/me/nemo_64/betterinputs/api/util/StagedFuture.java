@@ -1,4 +1,4 @@
-package me.nemo_64.betterinputs.api.future;
+package me.nemo_64.betterinputs.api.util;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
