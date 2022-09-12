@@ -6,6 +6,10 @@ public abstract class AbstractInput<V> {
 
     private final StagedFuture<V> future = new StagedFuture<>();
     
+    final StagedFuture<V> asFuture() {
+        return future;
+    }
+    
     protected final void completeValue(V value) {
         future.complete(value);
     }
