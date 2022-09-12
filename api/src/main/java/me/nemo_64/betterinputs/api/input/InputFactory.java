@@ -8,11 +8,11 @@ import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
 import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
 import me.nemo_64.betterinputs.api.util.registry.AbstractUnique;
 
-public abstract class InputTypeProvider<V, I extends IInputType<V>> extends AbstractUnique {
+public abstract class InputFactory<V, I extends AbstractInput<V>> extends AbstractUnique {
 
     private final Class<V> inputType;
 
-    public InputTypeProvider(final IPlatformKey key, final Class<V> inputType) {
+    public InputFactory(final IPlatformKey key, final Class<V> inputType) {
         super(key);
         this.inputType = Objects.requireNonNull(inputType, "Class inputType can't be null");
     }
