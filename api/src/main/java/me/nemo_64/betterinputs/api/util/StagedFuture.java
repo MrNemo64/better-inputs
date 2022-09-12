@@ -76,6 +76,30 @@ public final class StagedFuture<V> {
         return RESULT.compareAndSet(this, null, value);
     }
 
+    public final boolean isComplete() {
+        return result != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public final V get() {
+        if (result == null) {
+            throw new IllegalStateException("Future isn't complete yet");
+        }
+        if (result instanceof Result) {
+            return null;
+        }
+        return (V) result;
+    }
+
+    public final boolean completeVoid() {
+        if (result == null) {
+            return false;
+        }
+        internalComplete(null);
+        postComplete();
+        return true;
+    }
+
     public final boolean complete(V value) {
         if (result == null) {
             return false;
