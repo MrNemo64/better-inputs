@@ -71,7 +71,7 @@ public final class TickTimer {
         this.exceptionHandler = exceptionHandler;
     }
 
-    public TickTimer action(Runnable action) {
+    public TickTimer addAction(Runnable action) {
         if (action == null) {
             return this;
         }
@@ -86,6 +86,27 @@ public final class TickTimer {
         lock.writeLock().lock();
         try {
             actions.add(action);
+        } finally {
+            lock.writeLock().unlock();
+        }
+        return this;
+    }
+
+    public TickTimer removeAction(Runnable action) {
+        if (action == null) {
+            return this;
+        }
+        lock.readLock().lock();
+        try {
+            if (!actions.contains(action)) {
+                return this;
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        lock.writeLock().lock();
+        try {
+            actions.remove(action);
         } finally {
             lock.writeLock().unlock();
         }
