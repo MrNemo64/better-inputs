@@ -518,7 +518,7 @@ public final class StagedFuture<V> {
         return future;
     }
 
-    public <E> StagedFuture<E> thenComposeFlat(Function<? super V, StagedFuture<E>> function) {
+    public <E> StagedFuture<E> thenCompose(Function<? super V, StagedFuture<E>> function) {
         return composeStage(null, function);
     }
 
