@@ -2,16 +2,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>me.nemo_64.betterinputs</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>bukkit-parent</artifactId>
         <version>0.1.0</version>
     </parent>
-    <artifactId>bukkit</artifactId>
+    <artifactId>bukkit-api</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>reflection</artifactId>
+            <version>0.1.0-9a3dde9-SNAPSHOT</version>
         </dependency>
         
         <!-- Spigot -->
