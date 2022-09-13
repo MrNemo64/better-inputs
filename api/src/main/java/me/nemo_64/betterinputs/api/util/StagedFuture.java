@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -13,6 +14,8 @@ public final class StagedFuture<V> {
 
     private volatile Object result;
     private volatile Stage<?, ?> stage;
+
+    private Consumer<Throwable> fallbackExceptionHandler;
 
     private static int MODE_SYNC = 1;
     private static int MODE_ASYNC = 0;
@@ -30,6 +33,8 @@ public final class StagedFuture<V> {
 
     private static abstract class Stage<F, T> implements Runnable {
 
+        Consumer<Throwable> exceptionHandler;
+
         Stage<?, ?> nextStage;
 
         Executor executor;
@@ -38,7 +43,8 @@ public final class StagedFuture<V> {
 
         volatile boolean claimed = false;
 
-        Stage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next) {
+        Stage(Executor executor, Consumer<Throwable> exceptionHandler, StagedFuture<F> previous, StagedFuture<T> next) {
+            this.exceptionHandler = exceptionHandler;
             this.executor = executor;
             this.previous = previous;
             this.next = next;
@@ -70,11 +76,21 @@ public final class StagedFuture<V> {
 
     }
 
+    public StagedFuture() {}
+
+    private StagedFuture(Consumer<Throwable> fallbackExceptionHandler) {
+        this.fallbackExceptionHandler = fallbackExceptionHandler;
+    }
+
     final boolean internalComplete(Object value) {
         if (value == null) {
             return RESULT.compareAndSet(this, null, EMPTY);
         }
         return RESULT.compareAndSet(this, null, value);
+    }
+
+    private final <T> StagedFuture<T> newFuture() {
+        return new StagedFuture<>(fallbackExceptionHandler);
     }
 
     public final boolean isComplete() {
@@ -229,6 +245,28 @@ public final class StagedFuture<V> {
     }
 
     /*
+     * Exceptions
+     */
+
+    private final Consumer<Throwable> findFallbackExceptionHandler() {
+        if (fallbackExceptionHandler != null) {
+            return fallbackExceptionHandler;
+        }
+        StagedFuture<?> next = this;
+        while (next.stage != null && (next = next.stage.next) != null) {
+            if (next.fallbackExceptionHandler != null) {
+                return next.fallbackExceptionHandler;
+            }
+        }
+        return null;
+    }
+
+    public StagedFuture<V> withExceptionHandler(Consumer<Throwable> exceptionHandler) {
+        this.fallbackExceptionHandler = exceptionHandler;
+        return this;
+    }
+
+    /*
      * Stages
      */
 
@@ -238,14 +276,16 @@ public final class StagedFuture<V> {
 
         private Consumer<? super F> consumer;
 
-        AcceptStage(Executor executor, StagedFuture<F> previous, StagedFuture<Void> next, Consumer<? super F> consumer) {
-            super(executor, previous, next);
+        AcceptStage(Executor executor, Consumer<Throwable> exceptionHandler, StagedFuture<F> previous, StagedFuture<Void> next,
+            Consumer<? super F> consumer) {
+            super(executor, exceptionHandler, previous, next);
             this.consumer = consumer;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<Void> fire(int mode) {
+            Consumer<Throwable> expHndl = exceptionHandler;
             Consumer<? super F> cons;
             StagedFuture<F> prev;
             StagedFuture<Void> nx;
@@ -256,13 +296,24 @@ public final class StagedFuture<V> {
             complete:
             if (previous.result == null) {
                 if (res instanceof Result) {
-                    if (((Result) res).throwable != null) {
+                    Throwable thr;
+                    if ((thr = ((Result) res).throwable) != null) {
+                        try {
+                            if (expHndl != null) {
+                                expHndl.accept(thr);
+                                nx.internalComplete(EMPTY);
+                                break complete;
+                            }
+                        } catch (Throwable throwable) {
+                            res = new Result(throwable);
+                        }
                         nx.internalComplete(res);
                         break complete;
                     }
                     res = null;
                 }
             }
+            execute:
             try {
                 if (mode <= 0 && !claim()) {
                     return null;
@@ -270,18 +321,31 @@ public final class StagedFuture<V> {
                 cons.accept((F) res);
                 nx.internalComplete(null);
             } catch (Throwable throwable) {
+                try {
+                    if (expHndl != null) {
+                        expHndl.accept(throwable);
+                        nx.internalComplete(EMPTY);
+                        break execute;
+                    }
+                } catch (Throwable thr) {
+                    // Replace exception as the exception handler was not able to execute which is more important than
+                    // the previous exception
+                    throwable = thr;
+                }
                 nx.internalComplete(new Result(throwable));
             }
             previous = null;
             next = null;
             consumer = null;
+            exceptionHandler = null;
             return nx.postFire(prev, mode);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private StagedFuture<Void> acceptStageNow(Object res, Executor executor, Consumer<? super V> consumer) {
-        StagedFuture<Void> future = new StagedFuture<>();
+    private StagedFuture<Void> acceptStageNow(Object res, Executor executor, Consumer<Throwable> exceptionHandler,
+        Consumer<? super V> consumer) {
+        StagedFuture<Void> future = newFuture();
         if (res instanceof Result) {
             if (((Result) res).throwable != null) {
                 future.result = res;
@@ -291,7 +355,7 @@ public final class StagedFuture<V> {
         }
         try {
             if (executor != null) {
-                executor.execute(new AcceptStage<>(null, this, future, consumer));
+                executor.execute(new AcceptStage<>(null, exceptionHandler, this, future, consumer));
                 return future;
             }
             consumer.accept((V) res);
@@ -302,23 +366,32 @@ public final class StagedFuture<V> {
         return future;
     }
 
-    private StagedFuture<Void> acceptStage(Executor executor, Consumer<? super V> consumer) {
+    private StagedFuture<Void> acceptStage(Executor executor, Consumer<Throwable> exceptionHandler, Consumer<? super V> consumer) {
         Objects.requireNonNull(consumer, "Consumer can't be null");
         Object res;
         if ((res = result) != null) {
-            return acceptStageNow(res, executor, consumer);
+            return acceptStageNow(res, executor, exceptionHandler, consumer);
         }
-        StagedFuture<Void> future = new StagedFuture<>();
-        pushNewStage(new AcceptStage<>(executor, this, future, consumer));
+        StagedFuture<Void> future = newFuture();
+        pushNewStage(new AcceptStage<>(executor, exceptionHandler, this, future, consumer));
         return future;
     }
 
     public StagedFuture<Void> thenAccept(Consumer<? super V> consumer) {
-        return acceptStage(null, consumer);
+        return acceptStage(null, findFallbackExceptionHandler(), consumer);
     }
 
     public StagedFuture<Void> thenAcceptAsync(Executor executor, Consumer<? super V> consumer) {
-        return acceptStage(Objects.requireNonNull(executor, "Executor can't be null"), consumer);
+        return acceptStage(Objects.requireNonNull(executor, "Executor can't be null"), findFallbackExceptionHandler(), consumer);
+    }
+
+    public StagedFuture<Void> thenAcceptExceptionally(Consumer<? super V> consumer, Consumer<Throwable> exceptionHandler) {
+        return acceptStage(null, exceptionHandler, consumer);
+    }
+
+    public StagedFuture<Void> thenAcceptExceptionallyAsync(Executor executor, Consumer<? super V> consumer,
+        Consumer<Throwable> exceptionHandler) {
+        return acceptStage(Objects.requireNonNull(executor, "Executor can't be null"), exceptionHandler, consumer);
     }
 
     // Apply Stage
@@ -327,14 +400,16 @@ public final class StagedFuture<V> {
 
         private Function<? super F, ? super T> function;
 
-        ApplyStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, ? super T> function) {
-            super(executor, previous, next);
+        ApplyStage(Executor executor, Consumer<Throwable> exceptionHandler, StagedFuture<F> previous, StagedFuture<T> next,
+            Function<? super F, ? super T> function) {
+            super(executor, exceptionHandler, previous, next);
             this.function = function;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<T> fire(int mode) {
+            Consumer<Throwable> expHndl = exceptionHandler;
             Function<? super F, ? super T> func;
             StagedFuture<F> prev;
             StagedFuture<T> nx;
@@ -345,31 +420,55 @@ public final class StagedFuture<V> {
             complete:
             if (previous.result == null) {
                 if (res instanceof Result) {
-                    if (((Result) res).throwable != null) {
+                    Throwable thr;
+                    if ((thr = ((Result) res).throwable) != null) {
+                        try {
+                            if (expHndl != null) {
+                                expHndl.accept(thr);
+                                nx.internalComplete(EMPTY);
+                                break complete;
+                            }
+                        } catch (Throwable throwable) {
+                            res = new Result(throwable);
+                        }
                         nx.internalComplete(res);
                         break complete;
                     }
                     res = null;
                 }
             }
+            execute:
             try {
                 if (mode <= 0 && !claim()) {
                     return null;
                 }
                 nx.internalComplete(func.apply((F) res));
             } catch (Throwable throwable) {
+                try {
+                    if (expHndl != null) {
+                        expHndl.accept(throwable);
+                        nx.internalComplete(EMPTY);
+                        break execute;
+                    }
+                } catch (Throwable thr) {
+                    // Replace exception as the exception handler was not able to execute which is more important than
+                    // the previous exception
+                    throwable = thr;
+                }
                 nx.internalComplete(new Result(throwable));
             }
             previous = null;
             next = null;
             function = null;
+            exceptionHandler = null;
             return nx.postFire(prev, mode);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <E> StagedFuture<E> applyStageNow(Object res, Executor executor, Function<? super V, ? super E> function) {
-        StagedFuture<E> future = new StagedFuture<>();
+    private <E> StagedFuture<E> applyStageNow(Object res, Executor executor, Consumer<Throwable> exceptionHandler,
+        Function<? super V, ? super E> function) {
+        StagedFuture<E> future = newFuture();
         if (res instanceof Result) {
             if (((Result) res).throwable != null) {
                 future.result = res;
@@ -379,7 +478,7 @@ public final class StagedFuture<V> {
         }
         try {
             if (executor != null) {
-                executor.execute(new ApplyStage<>(null, this, future, function));
+                executor.execute(new ApplyStage<>(null, exceptionHandler, this, future, function));
                 return future;
             }
             future.result = function.apply((V) res);
@@ -389,23 +488,33 @@ public final class StagedFuture<V> {
         return future;
     }
 
-    private <E> StagedFuture<E> applyStage(Executor executor, Function<? super V, ? super E> function) {
+    private <E> StagedFuture<E> applyStage(Executor executor, Consumer<Throwable> exceptionHandler,
+        Function<? super V, ? super E> function) {
         Objects.requireNonNull(function, "Consumer can't be null");
         Object res;
         if ((res = result) != null) {
-            return applyStageNow(res, executor, function);
+            return applyStageNow(res, executor, exceptionHandler, function);
         }
-        StagedFuture<E> future = new StagedFuture<>();
-        pushNewStage(new ApplyStage<>(executor, this, future, function));
+        StagedFuture<E> future = newFuture();
+        pushNewStage(new ApplyStage<>(executor, exceptionHandler, this, future, function));
         return future;
     }
 
     public <E> StagedFuture<E> thenApply(Function<? super V, ? super E> function) {
-        return applyStage(null, function);
+        return applyStage(null, findFallbackExceptionHandler(), function);
     }
 
     public <E> StagedFuture<E> thenApplyAsync(Executor executor, Function<? super V, ? super E> function) {
-        return applyStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
+        return applyStage(Objects.requireNonNull(executor, "Executor can't be null"), findFallbackExceptionHandler(), function);
+    }
+
+    public <E> StagedFuture<E> thenApplyExceptionally(Function<? super V, ? super E> function, Consumer<Throwable> exceptionHandler) {
+        return applyStage(null, exceptionHandler, function);
+    }
+
+    public <E> StagedFuture<E> thenApplyExceptionallyAsync(Executor executor, Function<? super V, ? super E> function,
+        Consumer<Throwable> exceptionHandler) {
+        return applyStage(Objects.requireNonNull(executor, "Executor can't be null"), exceptionHandler, function);
     }
 
     // Compose Stage
@@ -413,7 +522,7 @@ public final class StagedFuture<V> {
     private static final class RelayStage<F, T extends F> extends Stage<F, T> {
 
         RelayStage(StagedFuture<F> previous, StagedFuture<T> next) {
-            super(null, previous, next);
+            super(null, null, previous, next);
         }
 
         @Override
@@ -437,14 +546,16 @@ public final class StagedFuture<V> {
 
         private Function<? super F, StagedFuture<T>> function;
 
-        ComposeStage(Executor executor, StagedFuture<F> previous, StagedFuture<T> next, Function<? super F, StagedFuture<T>> function) {
-            super(executor, previous, next);
+        ComposeStage(Executor executor, Consumer<Throwable> exceptionHandler, StagedFuture<F> previous, StagedFuture<T> next,
+            Function<? super F, StagedFuture<T>> function) {
+            super(executor, exceptionHandler, previous, next);
             this.function = function;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         StagedFuture<T> fire(int mode) {
+            Consumer<Throwable> expHndl = exceptionHandler;
             Function<? super F, StagedFuture<T>> func;
             StagedFuture<F> prev;
             StagedFuture<T> nx;
@@ -455,13 +566,24 @@ public final class StagedFuture<V> {
             complete:
             if (previous.result == null) {
                 if (res instanceof Result) {
-                    if (((Result) res).throwable != null) {
+                    Throwable thr;
+                    if ((thr = ((Result) res).throwable) != null) {
+                        try {
+                            if (expHndl != null) {
+                                expHndl.accept(thr);
+                                nx.internalComplete(EMPTY);
+                                break complete;
+                            }
+                        } catch (Throwable throwable) {
+                            res = new Result(throwable);
+                        }
                         nx.internalComplete(res);
                         break complete;
                     }
                     res = null;
                 }
             }
+            execute:
             try {
                 if (mode <= 0 && !claim()) {
                     return null;
@@ -476,18 +598,31 @@ public final class StagedFuture<V> {
                     }
                 }
             } catch (Throwable throwable) {
+                try {
+                    if (expHndl != null) {
+                        expHndl.accept(throwable);
+                        nx.internalComplete(EMPTY);
+                        break execute;
+                    }
+                } catch (Throwable thr) {
+                    // Replace exception as the exception handler was not able to execute which is more important than
+                    // the previous exception
+                    throwable = thr;
+                }
                 nx.internalComplete(new Result(throwable));
             }
             previous = null;
             next = null;
             function = null;
+            exceptionHandler = null;
             return nx.postFire(prev, mode);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <E> StagedFuture<E> composeStageNow(Object res, Executor executor, Function<? super V, StagedFuture<E>> function) {
-        StagedFuture<E> future = new StagedFuture<>();
+    private <E> StagedFuture<E> composeStageNow(Object res, Executor executor, Consumer<Throwable> exceptionHandler,
+        Function<? super V, StagedFuture<E>> function) {
+        StagedFuture<E> future = newFuture();
         if (res instanceof Result) {
             if (((Result) res).throwable != null) {
                 future.result = res;
@@ -497,7 +632,7 @@ public final class StagedFuture<V> {
         }
         try {
             if (executor != null) {
-                executor.execute(new ComposeStage<>(null, this, future, function));
+                executor.execute(new ComposeStage<>(null, exceptionHandler, this, future, function));
                 return future;
             }
             future.result = function.apply((V) res);
@@ -507,23 +642,34 @@ public final class StagedFuture<V> {
         return future;
     }
 
-    private <E> StagedFuture<E> composeStage(Executor executor, Function<? super V, StagedFuture<E>> function) {
+    private <E> StagedFuture<E> composeStage(Executor executor, Consumer<Throwable> exceptionHandler,
+        Function<? super V, StagedFuture<E>> function) {
         Objects.requireNonNull(function, "Consumer can't be null");
         Object res;
         if ((res = result) != null) {
-            return composeStageNow(res, executor, function);
+            return composeStageNow(res, executor, exceptionHandler, function);
         }
-        StagedFuture<E> future = new StagedFuture<>();
-        pushNewStage(new ComposeStage<>(executor, this, future, function));
+        StagedFuture<E> future = newFuture();
+        pushNewStage(new ComposeStage<>(executor, exceptionHandler, this, future, function));
         return future;
     }
 
     public <E> StagedFuture<E> thenCompose(Function<? super V, StagedFuture<E>> function) {
-        return composeStage(null, function);
+        return composeStage(null, findFallbackExceptionHandler(), function);
     }
 
     public <E> StagedFuture<E> thenComposeAsync(Executor executor, Function<? super V, StagedFuture<E>> function) {
-        return composeStage(Objects.requireNonNull(executor, "Executor can't be null"), function);
+        return composeStage(Objects.requireNonNull(executor, "Executor can't be null"), findFallbackExceptionHandler(), function);
+    }
+
+    public <E> StagedFuture<E> thenComposeExceptionally(Function<? super V, StagedFuture<E>> function,
+        Consumer<Throwable> exceptionHandler) {
+        return composeStage(null, exceptionHandler, function);
+    }
+
+    public <E> StagedFuture<E> thenComposeExceptionallyAsync(Executor executor, Function<? super V, StagedFuture<E>> function,
+        Consumer<Throwable> exceptionHandler) {
+        return composeStage(Objects.requireNonNull(executor, "Executor can't be null"), exceptionHandler, function);
     }
 
     // VarHandle mechanics
