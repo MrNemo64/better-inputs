@@ -10,8 +10,8 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import me.lauriichan.laylib.reflection.ClassUtil;
-import me.nemo_64.betterinputs.nms.IPlayerAdapter;
-import me.nemo_64.betterinputs.nms.packet.AbstractPacketAdapter;
+import me.nemo_64.betterinputs.nms.PlayerAdapter;
+import me.nemo_64.betterinputs.nms.packet.PacketAdapter;
 
 public final class PacketContainer {
 
@@ -71,7 +71,7 @@ public final class PacketContainer {
         return global;
     }
 
-    final boolean onPacket(IPlayerAdapter player, AbstractPacketAdapter adapter, boolean cancelled) {
+    final boolean onPacket(PlayerAdapter player, PacketAdapter adapter, boolean cancelled) {
         if (!global) {
             lock.readLock().lock();
             try {

@@ -5,15 +5,15 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import me.nemo_64.betterinputs.nms.IPlayerAdapter;
-import me.nemo_64.betterinputs.nms.packet.AbstractPacketAdapter;
+import me.nemo_64.betterinputs.nms.PlayerAdapter;
+import me.nemo_64.betterinputs.nms.packet.PacketAdapter;
 
 public final class PacketExecutor {
 
     @FunctionalInterface
     private static interface MethodExecutor {
 
-        Object execute(MethodHandle method, PacketContainer container, IPlayerAdapter player, AbstractPacketAdapter packet)
+        Object execute(MethodHandle method, PacketContainer container, PlayerAdapter player, PacketAdapter packet)
             throws Throwable;
 
     }
@@ -65,7 +65,7 @@ public final class PacketExecutor {
         return packetType;
     }
 
-    public boolean execute(PacketContainer container, IPlayerAdapter player, AbstractPacketAdapter packet) {
+    public boolean execute(PacketContainer container, PlayerAdapter player, PacketAdapter packet) {
         try {
             return sanitize(executor.execute(method, container, player, packet));
         } catch (Throwable e) {
@@ -96,16 +96,16 @@ public final class PacketExecutor {
         case 2:
             Class<?> param20 = parameters[0].getType();
             Class<?> param21 = parameters[1].getType();
-            if (AbstractPacketAdapter.class.isAssignableFrom(param20)) {
-                if (IPlayerAdapter.class.isAssignableFrom(param21)) {
+            if (PacketAdapter.class.isAssignableFrom(param20)) {
+                if (PlayerAdapter.class.isAssignableFrom(param21)) {
                     return new PacketExecutor(param20, methodHandle, PACKET_PLAYER, allowCancelled);
                 } else if (PacketContainer.class.isAssignableFrom(param21)) {
                     return new PacketExecutor(param20, methodHandle, PACKET_CONTAINER, allowCancelled);
                 }
                 return null; // Unsupported type
             }
-            if (AbstractPacketAdapter.class.isAssignableFrom(param21)) {
-                if (IPlayerAdapter.class.isAssignableFrom(param20)) {
+            if (PacketAdapter.class.isAssignableFrom(param21)) {
+                if (PlayerAdapter.class.isAssignableFrom(param20)) {
                     return new PacketExecutor(param21, methodHandle, PLAYER_PACKET, allowCancelled);
                 } else if (PacketContainer.class.isAssignableFrom(param20)) {
                     return new PacketExecutor(param21, methodHandle, CONTAINER_PACKET, allowCancelled);
@@ -117,42 +117,42 @@ public final class PacketExecutor {
             Class<?> param30 = parameters[0].getType();
             Class<?> param31 = parameters[1].getType();
             Class<?> param32 = parameters[1].getType();
-            if (AbstractPacketAdapter.class.isAssignableFrom(param30)) {
-                if (IPlayerAdapter.class.isAssignableFrom(param31)) {
+            if (PacketAdapter.class.isAssignableFrom(param30)) {
+                if (PlayerAdapter.class.isAssignableFrom(param31)) {
                     if (PacketContainer.class.isAssignableFrom(param32)) {
                         return new PacketExecutor(param30, methodHandle, PACKET_PLAYER_CONTAINER, allowCancelled);
                     }
                     return null; // Unsupported type
                 } else if (PacketContainer.class.isAssignableFrom(param31)) {
-                    if (IPlayerAdapter.class.isAssignableFrom(param32)) {
+                    if (PlayerAdapter.class.isAssignableFrom(param32)) {
                         return new PacketExecutor(param30, methodHandle, PACKET_CONTAINER_PLAYER, allowCancelled);
                     }
                     return null; // Unsupported type
                 }
                 return null; // Unsupported type
             }
-            if (AbstractPacketAdapter.class.isAssignableFrom(param31)) {
-                if (IPlayerAdapter.class.isAssignableFrom(param30)) {
+            if (PacketAdapter.class.isAssignableFrom(param31)) {
+                if (PlayerAdapter.class.isAssignableFrom(param30)) {
                     if (PacketContainer.class.isAssignableFrom(param32)) {
                         return new PacketExecutor(param31, methodHandle, PLAYER_PACKET_CONTAINER, allowCancelled);
                     }
                     return null; // Unsupported type
                 } else if (PacketContainer.class.isAssignableFrom(param30)) {
-                    if (IPlayerAdapter.class.isAssignableFrom(param32)) {
+                    if (PlayerAdapter.class.isAssignableFrom(param32)) {
                         return new PacketExecutor(param31, methodHandle, CONTAINER_PACKET_PLAYER, allowCancelled);
                     }
                     return null; // Unsupported type
                 }
                 return null; // Unsupported type
             }
-            if (AbstractPacketAdapter.class.isAssignableFrom(param32)) {
-                if (IPlayerAdapter.class.isAssignableFrom(param30)) {
+            if (PacketAdapter.class.isAssignableFrom(param32)) {
+                if (PlayerAdapter.class.isAssignableFrom(param30)) {
                     if (PacketContainer.class.isAssignableFrom(param31)) {
                         return new PacketExecutor(param31, methodHandle, PLAYER_CONTAINER_PACKET, allowCancelled);
                     }
                     return null; // Unsupported type
                 } else if (PacketContainer.class.isAssignableFrom(param30)) {
-                    if (IPlayerAdapter.class.isAssignableFrom(param31)) {
+                    if (PlayerAdapter.class.isAssignableFrom(param31)) {
                         return new PacketExecutor(param31, methodHandle, CONTAINER_PLAYER_PACKET, allowCancelled);
                     }
                     return null; // Unsupported type
@@ -162,7 +162,7 @@ public final class PacketExecutor {
             return null; // Unsupported type
         default:
             Class<?> param10 = parameters[0].getType();
-            if (AbstractPacketAdapter.class.isAssignableFrom(param10)) {
+            if (PacketAdapter.class.isAssignableFrom(param10)) {
                 return new PacketExecutor(param10, methodHandle, PACKET, allowCancelled);
             }
             return null; // Unsupported type

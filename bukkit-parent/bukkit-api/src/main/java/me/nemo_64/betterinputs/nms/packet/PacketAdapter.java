@@ -1,6 +1,6 @@
 package me.nemo_64.betterinputs.nms.packet;
 
-public abstract class AbstractPacketAdapter {
+public abstract class PacketAdapter {
 
     public abstract boolean isOutgoing();
 
