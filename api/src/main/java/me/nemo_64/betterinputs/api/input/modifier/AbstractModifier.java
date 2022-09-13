@@ -2,7 +2,7 @@ package me.nemo_64.betterinputs.api.input.modifier;
 
 import me.nemo_64.betterinputs.api.input.InputProvider;
 
-public abstract class AbstractModifier {
+public abstract class AbstractModifier<T> {
 
     private final boolean ticking;
     private boolean expired = false;
@@ -25,8 +25,8 @@ public abstract class AbstractModifier {
 
     public void tick() {}
 
-    public void onExpire(InputProvider<?> provider) {}
+    public void onExpire(InputProvider<T> provider) {}
     
-    public void onDone(InputProvider<?> provider) {}
+    public void onDone(InputProvider<T> provider) {}
 
 }

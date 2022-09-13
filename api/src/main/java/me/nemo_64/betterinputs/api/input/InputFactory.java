@@ -28,6 +28,8 @@ public abstract class InputFactory<V, I extends AbstractInput<V>> extends Abstra
         return value;
     }
 
+    public void onUnregister() {}
+
     protected abstract I provide(final IPlatformActor<?> actor, final ArgumentMap map);
 
 }

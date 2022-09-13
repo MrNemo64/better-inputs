@@ -38,7 +38,7 @@ public abstract class AbstractInput<V> {
         return cancelled;
     }
 
-    protected final InputProvider<V> provider() {
+    public final InputProvider<V> provider() {
         return provider;
     }
 

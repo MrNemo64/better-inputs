@@ -5,7 +5,7 @@ import java.util.Objects;
 import me.nemo_64.betterinputs.api.input.InputProvider;
 import me.nemo_64.betterinputs.api.util.tick.TickUnit;
 
-public final class TimeoutModifier extends AbstractModifier {
+public final class TimeoutModifier<T> extends AbstractModifier<T> {
 
     private long ticks = 0;
 
@@ -27,7 +27,7 @@ public final class TimeoutModifier extends AbstractModifier {
     }
 
     @Override
-    public void onExpire(InputProvider<?> provider) {
+    public void onExpire(InputProvider<T> provider) {
         provider.cancel("Timeout");
     }
 

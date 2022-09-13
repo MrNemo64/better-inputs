@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import me.lauriichan.laylib.reflection.ClassUtil;
@@ -46,10 +47,13 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         return keys.computeIfAbsent(loader, (i) -> new BukkitKeyProvider(this, plugin));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<IPlatformActor<E>> getActor(E actor) {
-
-        return null;
+        if (actor == null || !(actor instanceof CommandSender)) {
+            return Optional.empty();
+        }
+        return Optional.of((IPlatformActor<E>) new BukkitActor<>(CommandSender.class.cast(actor)));
     }
 
     @SuppressWarnings({
@@ -87,7 +91,12 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (!(platformKey instanceof BukkitKey)) {
             throw new IllegalArgumentException("IPlatformKey is not created by BetterInputs");
         }
-        return factories.remove((BukkitKey) platformKey) != null;
+        InputFactory<?, ?> factory = factories.remove((BukkitKey) platformKey);
+        if (factory == null) {
+            return false;
+        }
+        factory.onUnregister();
+        return true;
     }
 
     void removeProvider(BukkitKeyProvider provider) {

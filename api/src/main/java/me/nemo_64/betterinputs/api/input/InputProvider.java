@@ -13,6 +13,10 @@ import me.nemo_64.betterinputs.api.platform.IPlatformActor;
 import me.nemo_64.betterinputs.api.util.StagedFuture;
 import me.nemo_64.betterinputs.api.util.tick.TickTimer;
 
+@SuppressWarnings({
+    "rawtypes",
+    "unchecked"
+})
 public final class InputProvider<V> {
 
     private static final class TickAcceptor implements Runnable {
@@ -42,11 +46,11 @@ public final class InputProvider<V> {
     private final StagedFuture<V> future;
 
     private final BiConsumer<InputProvider<V>, String> cancelListener;
-    private final ConcurrentHashMap<Class<? extends AbstractModifier>, AbstractModifier> modifiers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Class<? extends AbstractModifier>, AbstractModifier<V>> modifiers = new ConcurrentHashMap<>();
 
     private final IPlatformActor<?> actor;
 
-    private BiConsumer<AbstractModifier, Throwable> modifierExceptionHandler;
+    private BiConsumer<AbstractModifier<V>, Throwable> modifierExceptionHandler;
 
     public InputProvider(final IPlatformActor<?> actor, final TickTimer timer, final AbstractInput<V> input,
         final Consumer<Throwable> exceptionHandler, final BiConsumer<InputProvider<V>, String> cancelListener) {
@@ -67,7 +71,7 @@ public final class InputProvider<V> {
         return future;
     }
 
-    public InputProvider<V> withModifier(AbstractModifier modifier) {
+    public InputProvider<V> withModifier(AbstractModifier<V> modifier) {
         Objects.requireNonNull(modifier, "Modifier can't be null");
         if (future.isComplete() || modifiers.containsKey(modifier.getClass())) {
             return this;
@@ -76,7 +80,7 @@ public final class InputProvider<V> {
         return this;
     }
 
-    public <M extends AbstractModifier> Optional<M> getModifier(Class<M> modifierType) {
+    public <M extends AbstractModifier<V>> Optional<M> getModifier(Class<M> modifierType) {
         if (modifierType == null) {
             return Optional.empty();
         }
@@ -88,7 +92,7 @@ public final class InputProvider<V> {
         return Optional.empty();
     }
 
-    public boolean hasModifier(Class<? extends AbstractModifier> modifierType) {
+    public boolean hasModifier(Class<? extends AbstractModifier<V>> modifierType) {
         if (modifierType == null) {
             return false;
         }
@@ -100,7 +104,7 @@ public final class InputProvider<V> {
         return false;
     }
 
-    public InputProvider<V> withModifierExceptionHandler(BiConsumer<AbstractModifier, Throwable> modifierExceptionHandler) {
+    public InputProvider<V> withModifierExceptionHandler(BiConsumer<AbstractModifier<V>, Throwable> modifierExceptionHandler) {
         this.modifierExceptionHandler = modifierExceptionHandler;
         return this;
     }
@@ -144,7 +148,7 @@ public final class InputProvider<V> {
         }
         AbstractModifier[] modifiers = this.modifiers.values().toArray(AbstractModifier[]::new);
         for (int index = 0; index < modifiers.length; index++) {
-            AbstractModifier modifier = modifiers[index];
+            AbstractModifier<V> modifier = modifiers[index];
             try {
                 modifier.tick();
                 if (modifier.isExpired()) {
@@ -166,7 +170,7 @@ public final class InputProvider<V> {
         }
         AbstractModifier[] modifiers = this.modifiers.values().toArray(AbstractModifier[]::new);
         this.modifiers.clear();
-        for (AbstractModifier modifier : modifiers) {
+        for (AbstractModifier<V> modifier : modifiers) {
             try {
                 modifier.onDone(this);
             } catch (Throwable throwable) {
