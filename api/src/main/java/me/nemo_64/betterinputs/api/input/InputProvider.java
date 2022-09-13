@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import me.lauriichan.laylib.reflection.StackTracker;
 import me.nemo_64.betterinputs.api.BetterInputs;
 import me.nemo_64.betterinputs.api.input.modifier.AbstractModifier;
+import me.nemo_64.betterinputs.api.platform.IPlatformActor;
 import me.nemo_64.betterinputs.api.util.StagedFuture;
 import me.nemo_64.betterinputs.api.util.tick.TickTimer;
 
@@ -43,21 +44,26 @@ public final class InputProvider<V> {
     private final BiConsumer<InputProvider<V>, String> cancelListener;
     private final ConcurrentHashMap<Class<? extends AbstractModifier>, AbstractModifier> modifiers = new ConcurrentHashMap<>();
 
+    private final IPlatformActor<?> actor;
+
     private BiConsumer<AbstractModifier, Throwable> modifierExceptionHandler;
 
-    public InputProvider(final TickTimer timer, final AbstractInput<V> input, final Consumer<Throwable> exceptionHandler,
-        final BiConsumer<InputProvider<V>, String> cancelListener) {
+    public InputProvider(final IPlatformActor<?> actor, final TickTimer timer, final AbstractInput<V> input,
+        final Consumer<Throwable> exceptionHandler, final BiConsumer<InputProvider<V>, String> cancelListener) {
         if (StackTracker.getCallerClass().filter(clazz -> BetterInputs.class.isAssignableFrom(clazz)).isEmpty()) {
             throw new UnsupportedOperationException("Can only be created by BetterInputs");
         }
+        this.actor = actor;
         this.input = input;
         this.future = input.asFuture().withExceptionHandler(exceptionHandler);
         this.acceptor = new TickAcceptor(this, timer);
         this.cancelListener = cancelListener;
-        input.provider(this);
     }
 
     public StagedFuture<V> asFuture() {
+        if (input.provider() == null) {
+            input.provider(this);
+        }
         return future;
     }
 
@@ -122,6 +128,10 @@ public final class InputProvider<V> {
 
     public boolean isAvailable() {
         return future.isComplete();
+    }
+
+    public IPlatformActor<?> getActor() {
+        return actor;
     }
 
     public V get() {

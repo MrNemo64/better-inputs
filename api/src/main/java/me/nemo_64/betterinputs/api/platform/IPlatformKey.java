@@ -9,4 +9,8 @@ public interface IPlatformKey {
     @Override
     String toString();
 
+    default boolean equals(IPlatformKey key) {
+        return key != null && toString().equals(key.toString());
+    }
+
 }

@@ -1,9 +1,10 @@
 package me.nemo_64.betterinputs.api.input;
 
+import me.nemo_64.betterinputs.api.platform.IPlatformActor;
 import me.nemo_64.betterinputs.api.util.StagedFuture;
 
 public abstract class AbstractInput<V> {
-
+    
     private final StagedFuture<V> future = new StagedFuture<>();
     private InputProvider<V> provider;
     private boolean cancelled = false;
@@ -15,7 +16,9 @@ public abstract class AbstractInput<V> {
         this.provider = provider;
         if (future.isComplete()) {
             provider.markComplete();
+            return;
         }
+        onStart(provider, provider.getActor());
     }
 
     final StagedFuture<V> asFuture() {
@@ -52,6 +55,8 @@ public abstract class AbstractInput<V> {
         }
         future.completeExceptionally(throwable);
     }
+    
+    protected abstract void onStart(InputProvider<V> provider, IPlatformActor<?> actor);
 
     protected boolean onCancel() {
         return false;
