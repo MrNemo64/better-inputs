@@ -4,7 +4,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import me.lauriichan.laylib.reflection.StackTracker;
+import me.nemo_64.betterinputs.api.BetterInputs;
 import me.nemo_64.betterinputs.api.input.modifier.AbstractModifier;
 import me.nemo_64.betterinputs.api.util.StagedFuture;
 import me.nemo_64.betterinputs.api.util.tick.TickTimer;
@@ -42,10 +45,14 @@ public final class InputProvider<V> {
 
     private BiConsumer<AbstractModifier, Throwable> modifierExceptionHandler;
 
-    InputProvider(final TickTimer timer, final AbstractInput<V> input, final BiConsumer<InputProvider<V>, String> cancelListener) {
-        this.acceptor = new TickAcceptor(this, timer);
+    public InputProvider(final TickTimer timer, final AbstractInput<V> input, final Consumer<Throwable> exceptionHandler,
+        final BiConsumer<InputProvider<V>, String> cancelListener) {
+        if (StackTracker.getCallerClass().filter(clazz -> BetterInputs.class.isAssignableFrom(clazz)).isEmpty()) {
+            throw new UnsupportedOperationException("Can only be created by BetterInputs");
+        }
         this.input = input;
-        this.future = input.asFuture();
+        this.future = input.asFuture().withExceptionHandler(exceptionHandler);
+        this.acceptor = new TickAcceptor(this, timer);
         this.cancelListener = cancelListener;
         input.provider(this);
     }

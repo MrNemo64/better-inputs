@@ -1,8 +1,8 @@
 package me.nemo_64.betterinputs.api.input;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
+import me.nemo_64.betterinputs.api.platform.IPlatformActor;
 import me.nemo_64.betterinputs.api.platform.IPlatformKey;
 import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
 import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
@@ -21,20 +21,13 @@ public abstract class InputFactory<V, I extends AbstractInput<V>> extends Abstra
         return inputType;
     }
 
-    public final I build(final Consumer<ArgumentMap> consumer) throws NotEnoughArgumentsException {
-        Objects.requireNonNull(consumer, "Consumer<ArgumentMap> can't be null!");
-        ArgumentMap map = new ArgumentMap();
-        consumer.accept(map);
-        return build(map);
-    }
-
-    public final I build(final ArgumentMap map) throws NotEnoughArgumentsException {
+    public final I build(final IPlatformActor<?> actor, final ArgumentMap map) throws NotEnoughArgumentsException {
         Objects.requireNonNull(map, "ArgumentMap can't be null!");
-        I value = provide(map);
+        I value = provide(actor, map);
         map.throwIfMissing();
         return value;
     }
 
-    protected abstract I provide(final ArgumentMap map);
+    protected abstract I provide(final IPlatformActor<?> actor, final ArgumentMap map);
 
 }
