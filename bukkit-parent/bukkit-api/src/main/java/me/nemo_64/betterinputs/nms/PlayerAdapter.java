@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.entity.Player;
 
-import me.nemo_64.betterinputs.nms.packet.PacketAdapter;
+import me.nemo_64.betterinputs.nms.packet.AbstractPacketOut;
 
 public abstract class PlayerAdapter {
 
@@ -69,6 +69,8 @@ public abstract class PlayerAdapter {
 
     public abstract int getPermissionLevel();
 
-    public abstract void send(PacketAdapter... packets);
+    public abstract void acknowledgeBlockChangesUpTo(int sequence);
+
+    public abstract void send(AbstractPacketOut... packets);
 
 }

@@ -13,11 +13,6 @@
             <artifactId>bukkit-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>api</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
         
         <!-- Spigot -->
         <dependency>

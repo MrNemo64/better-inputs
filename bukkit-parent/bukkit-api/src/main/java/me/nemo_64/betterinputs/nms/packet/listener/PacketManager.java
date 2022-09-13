@@ -3,20 +3,16 @@ package me.nemo_64.betterinputs.nms.packet.listener;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import me.nemo_64.betterinputs.nms.VersionHandler;
+import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
+import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
 import me.nemo_64.betterinputs.nms.PlayerAdapter;
-import me.nemo_64.betterinputs.nms.packet.PacketAdapter;
+import me.nemo_64.betterinputs.nms.packet.AbstractPacket;
+import me.nemo_64.betterinputs.nms.packet.AbstractPacketOut;
 
 public abstract class PacketManager {
 
     private final ArrayList<PacketContainer> listeners = new ArrayList<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
-    protected final VersionHandler versionHandler;
-
-    public PacketManager(final VersionHandler versionHandler) {
-        this.versionHandler = versionHandler;
-    }
 
     public final PacketContainer register(IPacketListener listener) {
         lock.readLock().lock();
@@ -57,7 +53,7 @@ public abstract class PacketManager {
         }
     }
 
-    public final boolean call(PlayerAdapter player, PacketAdapter packet) {
+    public final boolean call(PlayerAdapter player, AbstractPacket packet) {
         lock.readLock().lock();
         try {
             if (listeners.isEmpty()) {
@@ -84,5 +80,8 @@ public abstract class PacketManager {
             current.onPacket(player, packet, cancelled);
         }
     }
+
+    protected abstract <P extends AbstractPacketOut> P createPacket(ArgumentMap map, Class<P> packetType)
+        throws NotEnoughArgumentsException, IllegalStateException, IllegalArgumentException;
 
 }

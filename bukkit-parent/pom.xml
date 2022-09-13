@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>bukkit-api</module>
+  	<module>bukkit-1_19_R1</module>
   </modules>
 </project>

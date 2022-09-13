@@ -9,6 +9,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+import me.nemo_64.betterinputs.nms.packet.listener.PacketManager;
+
 public abstract class VersionHandler {
 
     protected final Plugin plugin;
@@ -34,11 +36,11 @@ public abstract class VersionHandler {
     }
 
     public final void disable() {
-        onDisable();
         HandlerList.unregisterAll(playerListener);
         for (Player player : Bukkit.getOnlinePlayers()) {
             quit(player);
         }
+        onDisable();
     }
 
     protected void onEnable(final PluginManager pluginManager) {}
@@ -71,6 +73,8 @@ public abstract class VersionHandler {
         }
         terminateAdapter(players.remove(player.getUniqueId()));
     }
+    
+    public abstract PacketManager getPacketManager();
 
     protected abstract PlayerAdapter createAdapter(Player player);
 

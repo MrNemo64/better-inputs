@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import me.lauriichan.laylib.reflection.ClassUtil;
 import me.nemo_64.betterinputs.nms.PlayerAdapter;
-import me.nemo_64.betterinputs.nms.packet.PacketAdapter;
+import me.nemo_64.betterinputs.nms.packet.AbstractPacket;
 
 public final class PacketContainer {
 
@@ -62,6 +62,48 @@ public final class PacketContainer {
         return acceptCancelled;
     }
 
+    public UUID[] getUsers() {
+        lock.readLock().lock();
+        try {
+            return users.toArray(UUID[]::new);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public boolean hasUser(UUID id) {
+        lock.readLock().lock();
+        try {
+            return users.contains(id);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public boolean addUser(UUID id) {
+        if (hasUser(id)) {
+            return false;
+        }
+        lock.writeLock().lock();
+        try {
+            return users.add(id);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public boolean removeUser(UUID id) {
+        if (!hasUser(id)) {
+            return false;
+        }
+        lock.writeLock().lock();
+        try {
+            return users.remove(id);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     public PacketContainer setGlobal(boolean global) {
         this.global = global;
         return this;
@@ -71,16 +113,9 @@ public final class PacketContainer {
         return global;
     }
 
-    final boolean onPacket(PlayerAdapter player, PacketAdapter adapter, boolean cancelled) {
-        if (!global) {
-            lock.readLock().lock();
-            try {
-                if (!users.contains(player.getUniqueId())) {
-                    return false;
-                }
-            } finally {
-                lock.readLock().unlock();
-            }
+    final boolean onPacket(PlayerAdapter player, AbstractPacket adapter, boolean cancelled) {
+        if (!global && !hasUser(player.getUniqueId())) {
+            return false;
         }
         Class<?> packetType = adapter.getClass();
         for (PacketExecutor executor : executors) {
