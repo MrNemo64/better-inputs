@@ -49,18 +49,18 @@ public final class AnvilInput extends AbstractInput<String> {
         String text = player.getData("text", String.class);
         if (modifier != null) {
             if (!modifier.attempt(text)) {
-                // TODO: Move to modifier maybe?
+                // TODO: Move to modifier maybe? => Probably yes
                 player.asBukkit().sendMessage("Please try again!");
                 return false;
             }
         }
-        listener.removeUser(player.getUniqueId());
         clearData(player);
         listener.asyncService().submit(() -> completeValue(text));
         return true;
     }
 
     private final void clearData(PlayerAdapter player) {
+        listener.removeUser(player.getUniqueId());
         player.removeData("input");
         player.removeData("text");
     }
@@ -69,7 +69,6 @@ public final class AnvilInput extends AbstractInput<String> {
     protected boolean onCancel() {
         PlayerAdapter player = versionHandler.getPlayer(provider().getActor().as(Player.class).getHandle());
         clearData(player);
-        listener.removeUser(player.getUniqueId());
         listener.mainService().submit(() -> player.closeMenu());
         return true;
     }

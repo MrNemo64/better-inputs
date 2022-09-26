@@ -56,7 +56,7 @@ public final class CommandBlockPacketListener implements IPacketListener {
         AttemptModifier<String> modifier = (AttemptModifier<String>) input.provider().getModifier(AttemptModifier.class).orElse(null);
         if (modifier != null) {
             if (!modifier.attempt(packet.getCommand())) {
-                // TODO: Move to modifier maybe?
+                // TODO: Move to modifier maybe? => Probably yes
                 player.asBukkit().sendMessage("Please try again!");
                 return true;
             }
