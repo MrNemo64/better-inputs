@@ -31,14 +31,15 @@ public final class VersionHandler1_19_R1 extends VersionHandler {
         // Incoming packets (nms)
         packetManager.register(ServerboundSetCommandBlockPacket.class, PacketInSetCommandBlock1_19_R1::new);
         packetManager.register(ServerboundUseItemOnPacket.class, PacketInUseItemOn1_19_R1::new);
+        packetManager.register(ServerboundSwingPacket.class, PacketInSwingArm1_19_R1::new);
         // Outgoing packets (nms)
         packetManager.register(ClientboundEntityEventPacket.class, PacketOutEntityEvent1_19_R1::new);
         packetManager.register(ClientboundBlockUpdatePacket.class, PacketOutBlockUpdate1_19_R1::new);
         packetManager.register(ClientboundBlockEntityDataPacket.class, PacketOutBlockEntityData1_19_R1::new);
         // Outgoing packets (adapter)
-        packetManager.registerOut(PacketOutEntityEvent.class, PacketOutEntityEvent1_19_R1::new);
-        packetManager.registerOut(PacketOutBlockUpdate.class, PacketOutBlockUpdate1_19_R1::new);
-        packetManager.registerOut(PacketOutBlockEntityData.class, PacketOutBlockEntityData1_19_R1::new);
+        packetManager.registerAdapter(PacketOutEntityEvent.class, PacketOutEntityEvent1_19_R1::new);
+        packetManager.registerAdapter(PacketOutBlockUpdate.class, PacketOutBlockUpdate1_19_R1::new);
+        packetManager.registerAdapter(PacketOutBlockEntityData.class, PacketOutBlockEntityData1_19_R1::new);
     }
 
     @Override

@@ -75,7 +75,7 @@ public abstract class VersionHandler {
         if (players.containsKey(player.getUniqueId())) {
             return;
         }
-        createAdapter(player);
+        players.put(player.getUniqueId(), createAdapter(player));
     }
 
     final void quit(Player player) {

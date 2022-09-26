@@ -26,7 +26,7 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
     }
 
     final void terminate() {
-
+        network.setActive(false);
     }
 
     public PlayerNetwork1_19_R1 getNetwork() {
@@ -44,7 +44,7 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
 
     @Override
     public int getPermissionLevel() {
-        return 0;
+        return minecraft.getServer().getProfilePermissions(minecraft.getGameProfile());
     }
 
     @Override

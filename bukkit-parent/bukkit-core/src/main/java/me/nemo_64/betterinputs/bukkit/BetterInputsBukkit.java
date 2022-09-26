@@ -22,7 +22,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     private static final Class<?> plugin_class_loader = ClassUtil.findClass("org.bukkit.plugin.java.PluginClassLoader");
 
     private final ConcurrentHashMap<ClassLoader, BukkitKeyProvider> keys = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<BukkitKey, InputFactory<?, ?>> factories = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, InputFactory<?, ?>> factories = new ConcurrentHashMap<>();
 
     private List<String> inputKeys;
 
@@ -34,7 +34,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (inputKeys != null) {
             return inputKeys;
         }
-        return inputKeys = factories.keySet().stream().map(BukkitKey::toString).collect(Collectors.toUnmodifiableList());
+        return inputKeys = factories.keySet().stream().collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -67,9 +67,6 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         return Optional.of((IPlatformActor<E>) new BukkitActor<>(CommandSender.class.cast(actor)));
     }
 
-    @SuppressWarnings({
-        "unlikely-arg-type"
-    })
     @Override
     public Optional<InputFactory<?, ?>> getInputFactory(String namespacedKey) {
         Objects.requireNonNull(namespacedKey, "String namespacedKey can't be null");
@@ -80,10 +77,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         return Optional.of(factory);
     }
 
-    @SuppressWarnings({
-        "unlikely-arg-type",
-        "unchecked"
-    })
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<InputFactory<T, ? extends AbstractInput<T>>> getInputFactory(String namespacedKey, Class<T> inputType) {
         Objects.requireNonNull(namespacedKey, "String namespacedKey can't be null");
@@ -102,9 +96,9 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (!(platformKey instanceof BukkitKey)) {
             throw new IllegalArgumentException("IPlatformKey of InputFactory is not created by BetterInputs");
         }
-        BukkitKey key = (BukkitKey) platformKey;
+        String key = ((BukkitKey) platformKey).toString();
         if (factories.containsKey(key)) {
-            throw new IllegalStateException("A InputFactory with key '" + key.toString() + "' already exists!");
+            throw new IllegalStateException("A InputFactory with key '" + key + "' already exists!");
         }
         factories.put(key, factory);
         inputKeys = null;
@@ -116,7 +110,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (!(platformKey instanceof BukkitKey)) {
             throw new IllegalArgumentException("IPlatformKey is not created by BetterInputs");
         }
-        InputFactory<?, ?> factory = factories.remove((BukkitKey) platformKey);
+        InputFactory<?, ?> factory = factories.remove(((BukkitKey) platformKey).toString());
         if (factory == null) {
             return false;
         }

@@ -116,16 +116,11 @@ public final class StagedFuture<V> {
     }
 
     public final boolean completeVoid() {
-        if (result == null) {
-            return false;
-        }
-        internalComplete(null);
-        postComplete();
-        return true;
+        return complete(null);
     }
 
     public final boolean complete(V value) {
-        if (result == null) {
+        if (result != null) {
             return false;
         }
         internalComplete(value);
@@ -134,7 +129,7 @@ public final class StagedFuture<V> {
     }
 
     public final boolean completeExceptionally(Throwable throwable) {
-        if (result == null) {
+        if (result != null) {
             return false;
         }
         Objects.requireNonNull(throwable, "Throwable can't be null");

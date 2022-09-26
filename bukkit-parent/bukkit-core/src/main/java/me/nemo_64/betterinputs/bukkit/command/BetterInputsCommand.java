@@ -2,6 +2,7 @@ package me.nemo_64.betterinputs.bukkit.command;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import me.lauriichan.laylib.command.Actor;
 import me.lauriichan.laylib.command.CommandManager;
@@ -15,7 +16,9 @@ import me.lauriichan.laylib.command.annotation.Command;
 import me.lauriichan.laylib.command.annotation.Description;
 import me.lauriichan.laylib.command.util.Triple;
 import me.lauriichan.laylib.localization.Key;
+import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.laylib.reflection.ClassUtil;
+import me.nemo_64.betterinputs.api.input.InputFactory;
 import me.nemo_64.betterinputs.api.input.modifier.TimeoutModifier;
 import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
 import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
@@ -34,22 +37,43 @@ public final class BetterInputsCommand {
      */
 
     @Action("test")
-    public void test(BetterInputsBukkit api, Actor<?> actor, @Argument(name = "input type") InputKey key,
-        @Argument(name = "arguments", optional = true) ArgumentMap map) {
+    public void test(BetterInputsBukkit api, Actor<?> actor, @Argument(name = "input type", index = 1) InputKey key,
+        @Argument(name = "arguments", optional = true, index = 2) ArgumentMap map) {
+        Optional<InputFactory<?, ?>> factory = api.getInputFactory(key.namespacedKey());
+        if (factory.isEmpty()) {
+            actor.sendMessage("Unknown input '" + key.namespacedKey() + "'!");
+            return;
+        }
         try {
-            api.createInput(Object.class).type(key.namespacedKey()).actor(actor.getHandle()).exceptionHandler((exception) -> {
-                actor.sendMessage("Something went wrong: '" + exception.getMessage() + "'!");
-            }).cancelListener((provider, reason) -> {
-                actor.sendMessage("Action cancelled: '" + reason + "'");
-            }).provide().withModifierExceptionHandler((modifier, exception) -> {
-                actor.sendMessage("Something went wrong with the '" + ClassUtil.getClassName(modifier.getClass()) + "' modifier: '"
-                    + exception.getMessage() + "'!");
-            }).withModifier(new TimeoutModifier<>(3, TickUnit.MINUTE)).asFuture().thenAccept(value -> {
-                actor.sendMessage("Input complete: '" + Objects.toString(actor) + "'");
-            });
+            api.createInput(factory.get().getInputType()).type(key.namespacedKey()).actor(actor.getHandle())
+                .exceptionHandler((exception) -> {
+                    actor.sendMessage("Something went wrong: '" + exception.getMessage() + "'!");
+                }).cancelListener((provider, reason) -> {
+                    actor.sendMessage("Action cancelled: '" + reason + "'");
+                }).provide().withModifierExceptionHandler((modifier, exception) -> {
+                    actor.sendMessage("Something went wrong with the '" + ClassUtil.getClassName(modifier.getClass()) + "' modifier: '"
+                        + exception.getMessage() + "'!");
+                }).withModifier(new TimeoutModifier<>(3, TickUnit.MINUTE)).asFuture().thenAccept(value -> {
+                    actor.sendMessage("Input complete: '" + Objects.toString(value) + "'");
+                });
         } catch (IllegalArgumentException | NotEnoughArgumentsException exp) {
             actor.sendMessage("Something went wrong while creating the input: '" + exp.getMessage() + "'!");
         }
+    }
+
+    /*
+     * Debug command
+     */
+
+    @Action("debug")
+    public void debug(ISimpleLogger logger, Actor<?> actor) {
+        if (logger.isDebug()) {
+            logger.setDebug(false);
+            actor.sendMessage("Disabled debug");
+            return;
+        }
+        logger.setDebug(true);
+        actor.sendMessage("Enabled debug");
     }
 
     /*

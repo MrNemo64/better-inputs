@@ -54,7 +54,7 @@ public final class PacketManager1_19_R1 extends PacketManager {
         nmsBuilders.put(packetType, new NmsPacketBuilder<>(packetType, function));
     }
 
-    public final <P extends AbstractPacketOut> void registerOut(Class<P> packetType, Function<ArgumentMap, ? extends P> function) {
+    public final <P extends AbstractPacketOut> void registerAdapter(Class<P> packetType, Function<ArgumentMap, ? extends P> function) {
         if (!(adapterBuilders instanceof HashMap)) {
             return;
         }
@@ -86,7 +86,7 @@ public final class PacketManager1_19_R1 extends PacketManager {
             return null;
         }
         AbstractPacket packet = function.apply(map);
-        if (packet == null || packetType.isAssignableFrom(packet.getClass())) {
+        if (packet == null || !packetType.isAssignableFrom(packet.getClass())) {
             throw new IllegalStateException("Invalid packet of type '" + ClassUtil.getClassName(packetType) + "'!");
         }
         return packetType.cast(packet);

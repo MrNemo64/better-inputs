@@ -10,16 +10,17 @@ public class PlayerNetwork1_19_R1 implements IPlayerNetwork {
 
     private final PacketManager1_19_R1 packetManager;
 
-    private final PacketInHandler packetIn = new PacketInHandler(this);
-    private final PacketOutHandler packetOut = new PacketOutHandler(this);
+    private final PacketInHandler1_19_R1 packetIn = new PacketInHandler1_19_R1(this);
+    private final PacketOutHandler1_19_R1 packetOut = new PacketOutHandler1_19_R1(this);
 
     private final PlayerAdapter1_19_R1 player;
 
-    private boolean active = false;
+    private boolean active = true;
 
     public PlayerNetwork1_19_R1(final PacketManager1_19_R1 packetManager, final PlayerAdapter1_19_R1 player) {
         this.packetManager = packetManager;
         this.player = player;
+        add(player.getChannel());
     }
 
     private void remove(Channel channel) {

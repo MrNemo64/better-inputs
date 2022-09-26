@@ -87,7 +87,9 @@ public abstract class PacketManager {
             if (cancelled && !current.doesAcceptCancelled()) {
                 continue;
             }
-            current.onPacket(player, packet, cancelled);
+            if (current.onPacket(player, packet, cancelled)) {
+                cancelled = true;
+            }
         }
     }
 

@@ -37,13 +37,13 @@ public final class CommandBlockPacketListener implements IPacketListener {
         Location target = packet.getHitLocation();
         if (target.getBlockX() != location.getBlockX() || target.getBlockY() != location.getBlockY()
             || target.getBlockZ() != location.getBlockZ()) {
-            return false;
+            return true;
         }
         player.acknowledgeBlockChangesUpTo(packet.getSequence());
         player.send(new AbstractPacketOut[] {
             manager.createPacket(new ArgumentMap().set("location", location).set("type", BlockEntityType.COMMAND_BLOCK),
                 PacketOutBlockEntityData.class),
-            manager.createPacket(new ArgumentMap().set("location", location).set("material", Material.COMMAND_BLOCK),
+            manager.createPacket(new ArgumentMap().set("location", location).set("state", Material.COMMAND_BLOCK),
                 PacketOutBlockUpdate.class)
         });
         return true; // Returning true cancels the packet from being received from the server or sent to the client
@@ -64,8 +64,8 @@ public final class CommandBlockPacketListener implements IPacketListener {
         player.removeData("input");
         Location location = player.getData("command", Location.class);
         player.removeData("command");
+        container.removeUser(player.getUniqueId());
         container.asyncService().submit(() -> {
-            player.getNetwork().setActive(false);
             input.complete(packet.getCommand());
             Player bukkit = player.asBukkit();
             player.send(manager.createPacket(new ArgumentMap().set("entity", bukkit).set("event", 24 + player.getPermissionLevel()),
@@ -79,14 +79,15 @@ public final class CommandBlockPacketListener implements IPacketListener {
     private Location getLocation(PlayerAdapter player) {
         Location location = player.getData("command", Location.class);
         Player bukkit = player.asBukkit();
-        if (!bukkit.getWorld().equals(location.getWorld()) || bukkit.getEyeLocation().distance(location) > 6) {
-            player.getNetwork().setActive(false);
+        if (!bukkit.getWorld().getUID().equals(location.getWorld().getUID()) || bukkit.getEyeLocation().distance(location) > 6) {
+            container.removeUser(bukkit.getUniqueId());
             container.mainService().submit(() -> {
                 player.send(manager.createPacket(new ArgumentMap().set("entity", bukkit).set("event", 24 + player.getPermissionLevel()),
                     PacketOutEntityEvent.class));
                 bukkit.sendBlockChange(location, bukkit.getWorld().getBlockAt(location).getBlockData());
                 bukkit.closeInventory();
             });
+            container.asyncService().submit(() -> player.getData("input", CommandBlockInput.class).provider().cancel("Too far away"));
             return null;
         }
         return location;

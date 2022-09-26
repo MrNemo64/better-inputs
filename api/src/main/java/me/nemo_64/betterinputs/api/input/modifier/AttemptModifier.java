@@ -20,10 +20,10 @@ public final class AttemptModifier<T> extends AbstractModifier<T> {
     }
 
     public boolean attempt(T input) {
-        if (attempts-- > 0 || isExpired()) {
+        if (isExpired()) {
             return false;
         }
-        if (validator.test(input)) {
+        if (attempts-- > 0 && validator.test(input)) {
             return true;
         }
         expire();

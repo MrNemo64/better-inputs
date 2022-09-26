@@ -13,7 +13,6 @@ import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.localization.source.AnnotationMessageSource;
 import me.lauriichan.laylib.localization.source.EnumMessageSource;
 import me.lauriichan.laylib.logger.ISimpleLogger;
-import me.lauriichan.laylib.logger.JavaSimpleLogger;
 import me.lauriichan.laylib.reflection.ClassUtil;
 import me.lauriichan.laylib.reflection.JavaAccess;
 import me.nemo_64.betterinputs.api.BetterInputs;
@@ -23,12 +22,14 @@ import me.nemo_64.betterinputs.bukkit.command.argument.ArgumentMapType;
 import me.nemo_64.betterinputs.bukkit.command.argument.InputKeyType;
 import me.nemo_64.betterinputs.bukkit.command.impl.BukkitCommandInjector;
 import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
+import me.nemo_64.betterinputs.bukkit.command.provider.LoggerProvider;
 // import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
 // import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
 import me.nemo_64.betterinputs.bukkit.input.command_block.CommandBlockInputFactory;
 import me.nemo_64.betterinputs.bukkit.message.*;
 import me.nemo_64.betterinputs.bukkit.message.impl.BetterMessageProviderFactory;
 import me.nemo_64.betterinputs.bukkit.util.BukkitExecutorService;
+import me.nemo_64.betterinputs.bukkit.util.BukkitSimpleLogger;
 import me.nemo_64.betterinputs.bukkit.nms.IServiceProvider;
 import me.nemo_64.betterinputs.bukkit.nms.VersionHandler;
 
@@ -60,7 +61,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     }
 
     private void setupEnvironment() {
-        logger = new JavaSimpleLogger(getLogger());
+        logger = new BukkitSimpleLogger(getLogger());
         messageManager = new MessageManager();
         commandManager = new CommandManager(logger);
     }
@@ -88,6 +89,9 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         registerArgumentTypes(commandManager.getRegistry());
         registerCommands(commandManager);
         registerInputFactories();
+        if(versionHandler != null) {
+            versionHandler.enable();
+        }
     }
 
     private void registerMessages(MessageManager manager) {
@@ -104,6 +108,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         
         // Register providers
         registry.setProvider(new BetterInputsProvider(api));
+        registry.setProvider(new LoggerProvider(logger));
     }
 
     private void registerCommands(CommandManager manager) {
@@ -128,8 +133,8 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     @Override
     public void onDisable() {
-        if (versionHandler == null) {
-            return;
+        if (versionHandler != null) {
+            versionHandler.disable();
         }
         api.shutdown();
     }

@@ -14,6 +14,7 @@ import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
 import me.nemo_64.betterinputs.bukkit.nms.PlayerAdapter;
 import me.nemo_64.betterinputs.bukkit.nms.VersionHandler;
 import me.nemo_64.betterinputs.bukkit.nms.packet.PacketOutEntityEvent;
+import me.nemo_64.betterinputs.bukkit.nms.packet.listener.PacketContainer;
 import me.nemo_64.betterinputs.bukkit.nms.packet.listener.PacketManager;
 import me.nemo_64.betterinputs.bukkit.util.direction.Direction;
 import me.nemo_64.betterinputs.bukkit.util.direction.Vertical;
@@ -25,9 +26,12 @@ public final class CommandBlockInput extends AbstractInput<String> {
     private final VersionHandler versionHandler;
     private final PacketManager packetManager;
 
-    public CommandBlockInput(final VersionHandler versionHandler) {
+    private final PacketContainer listener;
+
+    public CommandBlockInput(final VersionHandler versionHandler, final PacketContainer listener) {
         this.versionHandler = versionHandler;
         this.packetManager = versionHandler.getPacketManager();
+        this.listener = listener;
     }
 
     @Override
@@ -42,9 +46,12 @@ public final class CommandBlockInput extends AbstractInput<String> {
         BlockFace face = getFace(location);
         location = location.add(face.getModX(), face.getModY(), face.getModZ());
         bukkitPlayer.sendBlockChange(location, COMMAND_BLOCK_DATA);
+        if(location.getWorld() == null) {
+            location.setWorld(player.asBukkit().getWorld());
+        }
         player.setData("command", location);
         player.setData("input", this);
-        player.getNetwork().setActive(true);
+        listener.addUser(player.getUniqueId());
         // TODO: Possibly replace with modifier?
         bukkitPlayer.sendMessage("Enter input into command block");
     }
@@ -59,7 +66,21 @@ public final class CommandBlockInput extends AbstractInput<String> {
     }
 
     final void complete(String command) {
+        removeActor();
         completeValue(command);
+    }
+
+    private final void removeActor() {
+        PlayerAdapter adapter = versionHandler.getPlayer(provider().getActor().as(Player.class).getHandle());
+        adapter.removeData("command");
+        adapter.removeData("input");
+        listener.removeUser(adapter.getUniqueId());
+    }
+
+    @Override
+    protected boolean onCancel() {
+        removeActor();
+        return true;
     }
 
 }
