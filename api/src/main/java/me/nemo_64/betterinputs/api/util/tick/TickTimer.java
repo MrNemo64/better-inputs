@@ -171,7 +171,7 @@ public final class TickTimer {
                         counter = 0;
                     }
                     tickMillis = TimeUnit.NANOSECONDS.toMillis(nextLength - delta);
-                    tickNanos = (int) (nextLength - TimeUnit.MILLISECONDS.toNanos(tickMillis));
+                    tickNanos = (int) (nextLength - delta - TimeUnit.MILLISECONDS.toNanos(tickMillis));
                     if (tickMillis > 2) {
                         Thread.sleep(tickMillis, tickNanos);
                         continue;

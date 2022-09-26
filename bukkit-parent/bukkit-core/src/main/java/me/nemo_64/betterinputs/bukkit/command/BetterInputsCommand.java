@@ -16,11 +16,11 @@ import me.lauriichan.laylib.command.annotation.Description;
 import me.lauriichan.laylib.command.util.Triple;
 import me.lauriichan.laylib.localization.Key;
 import me.lauriichan.laylib.reflection.ClassUtil;
-import me.nemo_64.betterinputs.api.BetterInputs;
 import me.nemo_64.betterinputs.api.input.modifier.TimeoutModifier;
 import me.nemo_64.betterinputs.api.util.argument.ArgumentMap;
 import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
 import me.nemo_64.betterinputs.api.util.tick.TickUnit;
+import me.nemo_64.betterinputs.bukkit.BetterInputsBukkit;
 import me.nemo_64.betterinputs.bukkit.command.model.InputKey;
 
 @Command(name = "betterinputs", aliases = {
@@ -34,10 +34,10 @@ public final class BetterInputsCommand {
      */
 
     @Action("test")
-    public void test(BetterInputs<?> inputs, Actor<?> actor, @Argument(name = "input type") InputKey key,
+    public void test(BetterInputsBukkit api, Actor<?> actor, @Argument(name = "input type") InputKey key,
         @Argument(name = "arguments", optional = true) ArgumentMap map) {
         try {
-            inputs.createInput(Object.class).type(key.namespacedKey()).actor(actor.getHandle()).exceptionHandler((exception) -> {
+            api.createInput(Object.class).type(key.namespacedKey()).actor(actor.getHandle()).exceptionHandler((exception) -> {
                 actor.sendMessage("Something went wrong: '" + exception.getMessage() + "'!");
             }).cancelListener((provider, reason) -> {
                 actor.sendMessage("Action cancelled: '" + reason + "'");

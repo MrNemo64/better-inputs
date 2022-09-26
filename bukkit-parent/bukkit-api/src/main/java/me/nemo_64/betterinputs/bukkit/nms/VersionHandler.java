@@ -24,10 +24,6 @@ public abstract class VersionHandler {
         this.provider = provider;
     }
 
-    public final Plugin getPlugin() {
-        return provider.plugin();
-    }
-
     public final void enable() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         onEnable(pluginManager);
@@ -95,14 +91,16 @@ public abstract class VersionHandler {
 
     protected abstract void terminateAdapter(PlayerAdapter adapter);
 
-    public ExecutorService mainService() {
-        // TODO Auto-generated method stub
-        return null;
+    public final Plugin plugin() {
+        return provider.plugin();
     }
 
-    public ExecutorService asyncService() {
-        // TODO Auto-generated method stub
-        return null;
+    public final ExecutorService mainService() {
+        return provider.mainService();
+    }
+
+    public final ExecutorService asyncService() {
+        return provider.asyncService();
     }
 
 }

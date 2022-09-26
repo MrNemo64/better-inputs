@@ -20,6 +20,13 @@
             <artifactId>command</artifactId>
             <version>0.1.0-10191ac-SNAPSHOT</version>
         </dependency>
+        
+        <!-- Bukkit Version Compat -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_19_R1</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -98,6 +98,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     }
 
     private void registerArgumentTypes(ArgumentRegistry registry) {
+        // Register argument types
         registry.registerArgumentType(InputKeyType.class);
         registry.registerArgumentType(ArgumentMapType.class);
         

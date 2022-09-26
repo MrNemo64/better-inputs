@@ -49,7 +49,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     public IPlatformKeyProvider getKeyProvider(Plugin plugin) {
         Objects.requireNonNull(plugin, "Plugin can't be null!");
         ClassLoader loader = plugin.getClass().getClassLoader();
-        if (plugin_class_loader.equals(loader.getClass())) {
+        if (!plugin_class_loader.equals(loader.getClass())) {
             throw new IllegalArgumentException("Plugin is not loaded directly by bukkit");
         }
         if (keys.containsKey(loader)) {
