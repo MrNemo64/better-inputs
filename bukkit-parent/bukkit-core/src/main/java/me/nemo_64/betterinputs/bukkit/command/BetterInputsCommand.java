@@ -11,6 +11,7 @@ import me.lauriichan.laylib.command.NodeAction;
 import me.lauriichan.laylib.command.NodeArgument;
 import me.lauriichan.laylib.command.NodeCommand;
 import me.lauriichan.laylib.command.annotation.Action;
+import me.lauriichan.laylib.command.annotation.Param;
 import me.lauriichan.laylib.command.annotation.Argument;
 import me.lauriichan.laylib.command.annotation.Command;
 import me.lauriichan.laylib.command.annotation.Description;
@@ -54,6 +55,34 @@ public final class BetterInputsCommand {
                     actor.sendMessage("Something went wrong with the '" + ClassUtil.getClassName(modifier.getClass()) + "' modifier: '"
                         + exception.getMessage() + "'!");
                 }).withModifier(new TimeoutModifier<>(3, TickUnit.MINUTE)).asFuture().thenAccept(value -> {
+                    actor.sendMessage("Input complete: '" + Objects.toString(value) + "'");
+                });
+        } catch (IllegalArgumentException | NotEnoughArgumentsException exp) {
+            actor.sendMessage("Something went wrong while creating the input: '" + exp.getMessage() + "'!");
+        }
+    }
+
+    @Action("test timed")
+    public void testTimed(BetterInputsBukkit api, Actor<?> actor, @Argument(name = "input type", index = 1) InputKey key,
+        @Argument(name = "arguments", optional = true, index = 4) ArgumentMap map, @Argument(name = "time unit", index = 2) TickUnit unit,
+        @Argument(name = "time amount", index = 3, params = {
+            @Param(name = "minimum", intValue = 1, type = 3)
+        }) int amount) {
+        Optional<InputFactory<?, ?>> factory = api.getInputFactory(key.namespacedKey());
+        if (factory.isEmpty()) {
+            actor.sendMessage("Unknown input '" + key.namespacedKey() + "'!");
+            return;
+        }
+        try {
+            api.createInput(factory.get().getInputType()).type(key.namespacedKey()).actor(actor.getHandle())
+                .exceptionHandler((exception) -> {
+                    actor.sendMessage("Something went wrong: '" + exception.getMessage() + "'!");
+                }).cancelListener((provider, reason) -> {
+                    actor.sendMessage("Action cancelled: '" + reason + "'");
+                }).provide().withModifierExceptionHandler((modifier, exception) -> {
+                    actor.sendMessage("Something went wrong with the '" + ClassUtil.getClassName(modifier.getClass()) + "' modifier: '"
+                        + exception.getMessage() + "'!");
+                }).withModifier(new TimeoutModifier<>(amount, unit)).asFuture().thenAccept(value -> {
                     actor.sendMessage("Input complete: '" + Objects.toString(value) + "'");
                 });
         } catch (IllegalArgumentException | NotEnoughArgumentsException exp) {
