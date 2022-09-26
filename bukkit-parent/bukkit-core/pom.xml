@@ -13,13 +13,12 @@
             <artifactId>bukkit-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        
-        <!-- Spigot -->
+
+        <!-- Laylib -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.13-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>command</artifactId>
+            <version>0.1.0-9a3dde9-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
