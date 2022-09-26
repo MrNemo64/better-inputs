@@ -32,6 +32,7 @@ public final class VersionHandler1_19_R1 extends VersionHandler {
         packetManager.register(ServerboundSetCommandBlockPacket.class, PacketInSetCommandBlock1_19_R1::new);
         packetManager.register(ServerboundUseItemOnPacket.class, PacketInUseItemOn1_19_R1::new);
         packetManager.register(ServerboundSwingPacket.class, PacketInSwingArm1_19_R1::new);
+        packetManager.register(ServerboundRenameItemPacket.class, PacketInRenameItem1_19_R1::new);
         packetManager.register(ServerboundContainerClickPacket.class, PacketInContainerClick1_19_R1::new);
         packetManager.register(ServerboundContainerClosePacket.class, PacketInContainerClose1_19_R1::new);
         // Outgoing packets (nms)

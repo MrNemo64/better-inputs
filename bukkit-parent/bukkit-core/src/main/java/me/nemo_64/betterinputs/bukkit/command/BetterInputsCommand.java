@@ -54,7 +54,7 @@ public final class BetterInputsCommand {
                 }).provide().withModifierExceptionHandler((modifier, exception) -> {
                     actor.sendMessage("Something went wrong with the '" + ClassUtil.getClassName(modifier.getClass()) + "' modifier: '"
                         + exception.getMessage() + "'!");
-                }).withModifier(new TimeoutModifier<>(3, TickUnit.MINUTE)).asFuture().thenAccept(value -> {
+                }).withModifier(new TimeoutModifier<>(1, TickUnit.MINUTE)).asFuture().thenAccept(value -> {
                     actor.sendMessage("Input complete: '" + Objects.toString(value) + "'");
                 });
         } catch (IllegalArgumentException | NotEnoughArgumentsException exp) {

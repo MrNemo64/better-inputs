@@ -10,6 +10,7 @@ import me.nemo_64.betterinputs.bukkit.nms.PlayerAdapter;
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacketOut;
 import me.nemo_64.betterinputs.bukkit.nms.v1_19_R1.network.PacketManager1_19_R1;
 import me.nemo_64.betterinputs.bukkit.nms.v1_19_R1.network.PlayerNetwork1_19_R1;
+import me.nemo_64.betterinputs.bukkit.nms.v1_19_R1.util.MinecraftConstant1_19_R1;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
@@ -46,7 +47,7 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
 
     @Override
     public int createAnvilMenu(String name, ItemStack itemStack) {
-        AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory());
+        AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory(), MinecraftConstant1_19_R1.BETTER_NULL);
         menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         menu.setTitle(Component.literal(name));
         minecraft.containerMenu = menu;
@@ -54,13 +55,13 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
         minecraft.initMenu(menu);
         return menu.containerId;
     }
-    
+
     @Override
     public void reopenMenu() {
         AbstractContainerMenu menu = minecraft.containerMenu;
         minecraft.connection.send(new ClientboundOpenScreenPacket(menu.containerId, menu.getType(), menu.getTitle()));
     }
-    
+
     @Override
     public void closeMenu() {
         minecraft.connection.send(new ClientboundContainerClosePacket(minecraft.containerMenu.containerId));

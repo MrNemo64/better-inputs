@@ -21,6 +21,8 @@ public final class AnvilInput extends AbstractInput<String> {
     private final ItemStack item;
 
     private int containerId = -1;
+    
+    // TODO: WIP Anvil Input
 
     public AnvilInput(final VersionHandler versionHandler, final PacketContainer listener, final String name, final ItemStack item) {
         this.versionHandler = versionHandler;
