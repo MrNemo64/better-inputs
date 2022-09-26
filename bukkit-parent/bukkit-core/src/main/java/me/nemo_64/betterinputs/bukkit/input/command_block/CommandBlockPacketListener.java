@@ -65,14 +65,14 @@ public final class CommandBlockPacketListener implements IPacketListener {
         Location location = player.getData("command", Location.class);
         player.removeData("command");
         container.removeUser(player.getUniqueId());
-        container.asyncService().submit(() -> {
-            input.complete(packet.getCommand());
+        container.mainService().submit(() -> {
             Player bukkit = player.asBukkit();
             player.send(manager.createPacket(new ArgumentMap().set("entity", bukkit).set("event", 24 + player.getPermissionLevel()),
                 PacketOutEntityEvent.class));
-            bukkit.sendBlockChange(location, bukkit.getWorld().getBlockAt(location).getBlockData());
             bukkit.closeInventory();
+            bukkit.sendBlockChange(location, bukkit.getWorld().getBlockAt(location).getBlockData());
         });
+        container.asyncService().submit(() -> input.complete(packet.getCommand()));
         return true;
     }
 
@@ -84,8 +84,8 @@ public final class CommandBlockPacketListener implements IPacketListener {
             container.mainService().submit(() -> {
                 player.send(manager.createPacket(new ArgumentMap().set("entity", bukkit).set("event", 24 + player.getPermissionLevel()),
                     PacketOutEntityEvent.class));
-                bukkit.sendBlockChange(location, bukkit.getWorld().getBlockAt(location).getBlockData());
                 bukkit.closeInventory();
+                bukkit.sendBlockChange(location, bukkit.getWorld().getBlockAt(location).getBlockData());
             });
             container.asyncService().submit(() -> player.getData("input", CommandBlockInput.class).provider().cancel("Too far away"));
             return null;
