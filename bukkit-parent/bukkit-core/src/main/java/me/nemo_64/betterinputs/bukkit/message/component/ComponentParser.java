@@ -68,6 +68,9 @@ public final class ComponentParser {
     }
 
     public static BaseComponent[] parse(final String richString, final Color defaultColor, final ClickEvent click, final HoverEvent hover) {
+        if (richString == null || richString.isBlank()) {
+            return null;
+        }
         final ArrayList<BaseComponent> array = new ArrayList<>();
         TextComponent component = new TextComponent();
         ChatColor colorDefault = ChatColor.of(defaultColor);

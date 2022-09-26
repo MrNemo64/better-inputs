@@ -1,6 +1,7 @@
 package me.nemo_64.betterinputs.bukkit.message.component;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -16,7 +17,7 @@ public final class ComponentBuilder extends SendableComponent {
     private ComponentBuilder() {}
 
     public ComponentBuilder add(Component component) {
-        components.add(component);
+        components.add(Objects.requireNonNull(component));
         return this;
     }
 

@@ -13,7 +13,7 @@ final class BukkitKey implements IPlatformKey {
 
     public BukkitKey(final BukkitKeyProvider provider, final String key) {
         this.provider = Objects.requireNonNull(provider);
-        this.key = Objects.requireNonNull(key, "String key can't be null");
+        this.key = Objects.requireNonNull(key, "String key can't be null").toLowerCase();
     }
     
     final BukkitKeyProvider getProvider() {

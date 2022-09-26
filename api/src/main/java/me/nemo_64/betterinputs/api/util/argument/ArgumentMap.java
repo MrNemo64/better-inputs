@@ -72,6 +72,14 @@ public final class ArgumentMap {
         return clone;
     }
 
+    public void copyFrom(ArgumentMap map) {
+        if (map == null) {
+            this.map.clear();
+            return;
+        }
+        this.map.putAll(map.map);
+    }
+
     public boolean isEmpty() {
         return map.isEmpty();
     }

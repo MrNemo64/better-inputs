@@ -36,6 +36,11 @@ public final class InputBuilder<T> {
         return this;
     }
 
+    public InputBuilder<T> params(ArgumentMap map) {
+        this.map.copyFrom(map);
+        return this;
+    }
+
     public InputBuilder<T> param(String name, Object value) {
         map.set(name, value);
         return this;

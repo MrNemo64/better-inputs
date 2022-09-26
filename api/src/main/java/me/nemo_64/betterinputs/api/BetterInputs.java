@@ -1,5 +1,6 @@
 package me.nemo_64.betterinputs.api;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,6 +35,8 @@ public abstract class BetterInputs<P> {
 
     protected abstract P asPlatformIdentifyable(Object object);
 
+    public abstract List<String> getKeys();
+    
     public final Optional<IPlatformKeyProvider> tryGetKeyProvider(Object object) {
         P identifyable = asPlatformIdentifyable(object);
         if (identifyable == null) {
@@ -45,6 +48,8 @@ public abstract class BetterInputs<P> {
     public abstract IPlatformKeyProvider getKeyProvider(P platformIdentifyable);
 
     public abstract <E> Optional<IPlatformActor<E>> getActor(E actor);
+    
+    public abstract Optional<InputFactory<?, ?>> getInputFactory(String namespacedKey);
 
     public abstract <T> Optional<InputFactory<T, ? extends AbstractInput<T>>> getInputFactory(String namespacedKey, Class<T> inputType);
 

@@ -7,13 +7,26 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.lauriichan.laylib.command.ArgumentRegistry;
+import me.lauriichan.laylib.command.CommandManager;
+import me.lauriichan.laylib.localization.MessageManager;
+import me.lauriichan.laylib.localization.source.AnnotationMessageSource;
+import me.lauriichan.laylib.localization.source.EnumMessageSource;
+import me.lauriichan.laylib.logger.ISimpleLogger;
+import me.lauriichan.laylib.logger.JavaSimpleLogger;
 import me.lauriichan.laylib.reflection.ClassUtil;
 import me.lauriichan.laylib.reflection.JavaAccess;
 import me.nemo_64.betterinputs.api.BetterInputs;
 import me.nemo_64.betterinputs.api.platform.IPlatformKeyProvider;
-//import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
-//import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
+import me.nemo_64.betterinputs.bukkit.command.BetterInputsCommand;
+import me.nemo_64.betterinputs.bukkit.command.argument.ArgumentMapType;
+import me.nemo_64.betterinputs.bukkit.command.argument.InputKeyType;
+import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
+// import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
+// import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
 import me.nemo_64.betterinputs.bukkit.input.command_block.CommandBlockInputFactory;
+import me.nemo_64.betterinputs.bukkit.message.*;
+import me.nemo_64.betterinputs.bukkit.message.impl.BetterMessageProviderFactory;
 import me.nemo_64.betterinputs.bukkit.util.BukkitExecutorService;
 import me.nemo_64.betterinputs.bukkit.nms.IServiceProvider;
 import me.nemo_64.betterinputs.bukkit.nms.VersionHandler;
@@ -30,9 +43,28 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     private final ExecutorService mainService = new BukkitExecutorService(this, false);
     private final ExecutorService asyncService = new BukkitExecutorService(this, true);
 
+    private ISimpleLogger logger;
+    private CommandManager commandManager;
+    private MessageManager messageManager;
+
+    /*
+     * Setup
+     */
+
     @Override
     public void onLoad() {
         getServer().getServicesManager().register(BetterInputs.class, api, this, ServicePriority.Highest);
+        setupVersionHandler();
+        setupEnvironment();
+    }
+
+    private void setupEnvironment() {
+        logger = new JavaSimpleLogger(getLogger());
+        commandManager = new CommandManager(logger);
+        messageManager = new MessageManager();
+    }
+
+    private void setupVersionHandler() {
         try {
             versionHandler = initVersionHandler();
         } catch (Exception exp) {
@@ -43,19 +75,53 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         }
     }
 
+    /*
+     * Start
+     */
+
     @Override
     public void onEnable() {
         this.keyProvider = api.getKeyProvider(this);
+        registerMessages(messageManager);
+        registerArgumentTypes(commandManager.getRegistry());
+        registerCommands(commandManager);
+        registerInputFactories();
+    }
+
+    private void registerMessages(MessageManager manager) {
+        final BetterMessageProviderFactory factory = new BetterMessageProviderFactory();
+        manager.register(new EnumMessageSource(CommandManagerMessage.class, factory));
+        manager.register(new EnumMessageSource(CommandDescription.class, factory));
+        manager.register(new AnnotationMessageSource(Messages.class, factory));
+    }
+
+    private void registerArgumentTypes(ArgumentRegistry registry) {
+        registry.registerArgumentType(InputKeyType.class);
+        registry.registerArgumentType(ArgumentMapType.class);
+        
+        // Register providers
+        registry.setProvider(new BetterInputsProvider(api));
+    }
+
+    private void registerCommands(CommandManager manager) {
+        manager.register(BetterInputsCommand.class);
+    }
+
+    private void registerInputFactories() {
         // TODO: WIP
         // api.registerInputFactory(new ChatInputFactory(keyProvider.getKey("input/chat")));
         if (versionHandler != null) {
             // TODO: WIP
             // api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey("input/anvil")));
-            
+
             // TODO: Test if everything works correctly
             api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey("input/command_block"), versionHandler));
         }
     }
+
+    /*
+     * Shutdown
+     */
 
     @Override
     public void onDisable() {
@@ -65,9 +131,17 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         api.shutdown();
     }
 
+    /*
+     * Getter
+     */
+
     public VersionHandler getVersionHandler() {
         return versionHandler;
     }
+
+    /*
+     * ServiceProvider implementation
+     */
 
     @Override
     public final Plugin plugin() {

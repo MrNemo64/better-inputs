@@ -7,6 +7,9 @@ import me.lauriichan.laylib.localization.source.IMessageDefinition;
 
 public enum CommandDescription implements IMessageDefinition {
 
+    BETTERINPUTS_PARENT("Main command for all BetterInputs commands"),
+    BETTERINPUTS_HELP("Gives all information available about a command (without arguments)"),
+    
     ;
 
     private final String id;

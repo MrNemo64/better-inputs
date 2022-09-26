@@ -1,8 +1,10 @@
 package me.nemo_64.betterinputs.bukkit;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -22,8 +24,17 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     private final ConcurrentHashMap<ClassLoader, BukkitKeyProvider> keys = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<BukkitKey, InputFactory<?, ?>> factories = new ConcurrentHashMap<>();
 
+    private List<String> inputKeys;
+
     final void shutdown() {
         inputTick.shutdown();
+    }
+
+    public final List<String> getKeys() {
+        if (inputKeys != null) {
+            return inputKeys;
+        }
+        return inputKeys = factories.keySet().stream().map(BukkitKey::toString).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -57,6 +68,19 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     }
 
     @SuppressWarnings({
+        "unlikely-arg-type"
+    })
+    @Override
+    public Optional<InputFactory<?, ?>> getInputFactory(String namespacedKey) {
+        Objects.requireNonNull(namespacedKey, "String namespacedKey can't be null");
+        InputFactory<?, ?> factory = factories.get(namespacedKey.toLowerCase());
+        if (factory == null) {
+            return Optional.empty();
+        }
+        return Optional.of(factory);
+    }
+
+    @SuppressWarnings({
         "unlikely-arg-type",
         "unchecked"
     })
@@ -83,6 +107,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
             throw new IllegalStateException("A InputFactory with key '" + key.toString() + "' already exists!");
         }
         factories.put(key, factory);
+        inputKeys = null;
     }
 
     @Override
@@ -95,6 +120,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (factory == null) {
             return false;
         }
+        inputKeys = null;
         factory.onUnregister();
         return true;
     }

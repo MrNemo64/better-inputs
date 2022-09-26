@@ -3,7 +3,9 @@ package me.nemo_64.betterinputs.bukkit.message.component;
 import java.awt.Color;
 import java.util.Arrays;
 
+import me.lauriichan.laylib.command.Actor;
 import me.lauriichan.laylib.localization.IMessage;
+import me.lauriichan.laylib.localization.MessageProvider;
 import me.lauriichan.laylib.logger.util.StringUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -12,6 +14,21 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Entity;
 
 public final class Component extends SendableComponent {
+
+    public static Component of(MessageProvider provider, String language) {
+        return of(provider.getMessage(language));
+    }
+
+    public static Component of(MessageProvider provider) {
+        return of(provider.getMessage(Actor.DEFAULT_LANGUAGE));
+    }
+
+    public static Component of(IMessage message) {
+        if (message == null) {
+            return new Component("");
+        }
+        return new Component(message.value());
+    }
 
     public static Component of(String message) {
         return new Component(message);
@@ -28,7 +45,7 @@ public final class Component extends SendableComponent {
 
     private BaseComponent[] componentMessage = EMPTY;
 
-    public Component(final String message) {
+    private Component(final String message) {
         this.message = message;
     }
 
@@ -113,10 +130,26 @@ public final class Component extends SendableComponent {
         }
         return hover(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.hover.content.Text(component.build())));
     }
-    
+
+    public Component hoverText(final MessageProvider provider, final String language) {
+        if (provider == null) {
+            return this;
+        }
+        return hoverText(provider.getMessage(language));
+    }
+
+    public Component hoverText(final MessageProvider provider) {
+        if (provider == null) {
+            return this;
+        }
+        return hoverText(provider.getMessage(Actor.DEFAULT_LANGUAGE));
+    }
+
     public Component hoverText(final IMessage message) {
-        
-        return this;
+        if (message == null) {
+            return this;
+        }
+        return hoverText(message.value());
     }
 
     public Component hoverText(final String string) {
@@ -147,8 +180,13 @@ public final class Component extends SendableComponent {
         if (!changed) {
             return componentMessage;
         }
+        changed = false;
         if (componentMessage == EMPTY) {
-            return (componentMessage = ComponentParser.parse(message, defaultColor, click, hover));
+            BaseComponent[] components = ComponentParser.parse(message, defaultColor, click, hover);
+            if (components == null) {
+                return componentMessage;
+            }
+            return (componentMessage = components);
         }
         for (BaseComponent component : componentMessage) {
             component.setClickEvent(click);
