@@ -1,15 +1,22 @@
 package me.nemo_64.betterinputs.bukkit.nms.v1_19_R1;
 
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import io.netty.channel.Channel;
 import me.nemo_64.betterinputs.bukkit.nms.PlayerAdapter;
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacketOut;
 import me.nemo_64.betterinputs.bukkit.nms.v1_19_R1.network.PacketManager1_19_R1;
 import me.nemo_64.betterinputs.bukkit.nms.v1_19_R1.network.PlayerNetwork1_19_R1;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
 
 public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
 
@@ -35,6 +42,29 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
 
     public ServerPlayer asMinecraft() {
         return minecraft;
+    }
+
+    @Override
+    public int createAnvilMenu(String name, ItemStack itemStack) {
+        AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory());
+        menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
+        menu.setTitle(Component.literal(name));
+        minecraft.containerMenu = menu;
+        minecraft.connection.send(new ClientboundOpenScreenPacket(menu.containerId, menu.getType(), menu.getTitle()));
+        minecraft.initMenu(menu);
+        return menu.containerId;
+    }
+    
+    @Override
+    public void reopenMenu() {
+        AbstractContainerMenu menu = minecraft.containerMenu;
+        minecraft.connection.send(new ClientboundOpenScreenPacket(menu.containerId, menu.getType(), menu.getTitle()));
+    }
+    
+    @Override
+    public void closeMenu() {
+        minecraft.connection.send(new ClientboundContainerClosePacket(minecraft.containerMenu.containerId));
+        minecraft.doCloseContainer();
     }
 
     @Override

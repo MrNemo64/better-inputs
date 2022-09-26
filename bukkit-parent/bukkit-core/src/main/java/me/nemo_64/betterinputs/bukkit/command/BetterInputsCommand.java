@@ -64,7 +64,9 @@ public final class BetterInputsCommand {
 
     @Action("test timed")
     public void testTimed(BetterInputsBukkit api, Actor<?> actor, @Argument(name = "input type", index = 1) InputKey key,
-        @Argument(name = "arguments", optional = true, index = 4) ArgumentMap map, @Argument(name = "time unit", index = 2) TickUnit unit,
+        @Argument(name = "arguments", optional = true, index = 4) ArgumentMap map, @Argument(name = "time unit", index = 2, params = {
+            @Param(name = "type", classValue = TickUnit.class, type = 7)
+        }) TickUnit unit,
         @Argument(name = "time amount", index = 3, params = {
             @Param(name = "minimum", intValue = 1, type = 3)
         }) int amount) {

@@ -23,8 +23,7 @@ import me.nemo_64.betterinputs.bukkit.command.argument.InputKeyType;
 import me.nemo_64.betterinputs.bukkit.command.impl.BukkitCommandInjector;
 import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
 import me.nemo_64.betterinputs.bukkit.command.provider.LoggerProvider;
-// import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
-// import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
+import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
 import me.nemo_64.betterinputs.bukkit.input.command_block.CommandBlockInputFactory;
 import me.nemo_64.betterinputs.bukkit.message.*;
 import me.nemo_64.betterinputs.bukkit.message.impl.BetterMessageProviderFactory;
@@ -89,7 +88,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         registerArgumentTypes(commandManager.getRegistry());
         registerCommands(commandManager);
         registerInputFactories();
-        if(versionHandler != null) {
+        if (versionHandler != null) {
             versionHandler.enable();
         }
     }
@@ -105,7 +104,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         // Register argument types
         registry.registerArgumentType(InputKeyType.class);
         registry.registerArgumentType(ArgumentMapType.class);
-        
+
         // Register providers
         registry.setProvider(new BetterInputsProvider(api));
         registry.setProvider(new LoggerProvider(logger));
@@ -119,10 +118,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         // TODO: WIP
         // api.registerInputFactory(new ChatInputFactory(keyProvider.getKey("input/chat")));
         if (versionHandler != null) {
-            // TODO: WIP
-            // api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey("input/anvil")));
-
-            // TODO: Test if everything works correctly
+            api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey("input/anvil"), versionHandler));
             api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey("input/command_block"), versionHandler));
         }
     }

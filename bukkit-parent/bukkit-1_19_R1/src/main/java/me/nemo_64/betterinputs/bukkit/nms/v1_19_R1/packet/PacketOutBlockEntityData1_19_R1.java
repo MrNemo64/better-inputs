@@ -24,17 +24,19 @@ public final class PacketOutBlockEntityData1_19_R1 extends PacketOutBlockEntityD
         Location location = map.require("location", Location.class);
         BlockEntityType entityType = map.require("type", BlockEntityType.class);
         map.throwIfMissing();
-        BlockEntity entity = createBlockEntity(entityType, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        BlockEntity entity = createBlockEntity(map, entityType, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
         if (entity == null) {
             throw new IllegalArgumentException("BlockEntityType '" + entityType.name() + "' is not supported!");
         }
         this.packet = ClientboundBlockEntityDataPacket.create(entity);
     }
 
-    private BlockEntity createBlockEntity(BlockEntityType entityType, BlockPos pos) {
+    private BlockEntity createBlockEntity(ArgumentMap map, BlockEntityType entityType, BlockPos pos) {
         switch (entityType) {
         case COMMAND_BLOCK:
-            return new CommandBlockEntity(pos, Blocks.COMMAND_BLOCK.defaultBlockState());
+            CommandBlockEntity commandBlockEntity = new CommandBlockEntity(pos, Blocks.COMMAND_BLOCK.defaultBlockState());
+            commandBlockEntity.getCommandBlock().setCommand(map.get("Command", String.class).orElse(""));
+            return commandBlockEntity;
         default:
             return null;
         }

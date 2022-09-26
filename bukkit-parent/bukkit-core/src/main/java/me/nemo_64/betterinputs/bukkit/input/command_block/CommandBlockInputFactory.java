@@ -24,7 +24,7 @@ public final class CommandBlockInputFactory extends InputFactory<String, Command
 
     @Override
     protected CommandBlockInput provide(IPlatformActor<?> actor, ArgumentMap map) {
-        return new CommandBlockInput(versionHandler, listener.getContainer());
+        return new CommandBlockInput(versionHandler, listener.getContainer(), map.get("placeholder", String.class).orElse(""));
     }
 
 }

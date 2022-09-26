@@ -3,7 +3,9 @@ package me.nemo_64.betterinputs.bukkit.nms;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacketOut;
 
@@ -64,6 +66,16 @@ public abstract class PlayerAdapter {
     public final void setData(String key, Object data) {
         this.data.put(key, data);
     }
+    
+    public final int createAnvilMenu(String name) {
+        return createAnvilMenu(name, new ItemStack(Material.PAPER));
+    }
+    
+    public abstract int createAnvilMenu(String name, ItemStack placeholderItem);
+
+    public abstract void reopenMenu();
+    
+    public abstract void closeMenu();
 
     public abstract IPlayerNetwork getNetwork();
     
@@ -74,5 +86,6 @@ public abstract class PlayerAdapter {
     public abstract void acknowledgeBlockChangesUpTo(int sequence);
 
     public abstract void send(AbstractPacketOut... packets);
+
 
 }
