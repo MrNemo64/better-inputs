@@ -21,6 +21,7 @@ import me.nemo_64.betterinputs.api.platform.IPlatformKeyProvider;
 import me.nemo_64.betterinputs.bukkit.command.BetterInputsCommand;
 import me.nemo_64.betterinputs.bukkit.command.argument.ArgumentMapType;
 import me.nemo_64.betterinputs.bukkit.command.argument.InputKeyType;
+import me.nemo_64.betterinputs.bukkit.command.impl.BukkitCommandInjector;
 import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
 // import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
 // import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
@@ -60,8 +61,8 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     private void setupEnvironment() {
         logger = new JavaSimpleLogger(getLogger());
-        commandManager = new CommandManager(logger);
         messageManager = new MessageManager();
+        commandManager = new CommandManager(logger);
     }
 
     private void setupVersionHandler() {
@@ -81,7 +82,8 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     @Override
     public void onEnable() {
-        this.keyProvider = api.getKeyProvider(this);
+        commandManager.setInjector(new BukkitCommandInjector(commandManager, messageManager, this));
+        keyProvider = api.getKeyProvider(this);
         registerMessages(messageManager);
         registerArgumentTypes(commandManager.getRegistry());
         registerCommands(commandManager);
