@@ -23,6 +23,7 @@ import me.nemo_64.betterinputs.bukkit.command.argument.InputKeyType;
 import me.nemo_64.betterinputs.bukkit.command.impl.BukkitCommandInjector;
 import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
 import me.nemo_64.betterinputs.bukkit.command.provider.LoggerProvider;
+import me.nemo_64.betterinputs.bukkit.input.Inputs;
 import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
 import me.nemo_64.betterinputs.bukkit.input.command_block.CommandBlockInputFactory;
 import me.nemo_64.betterinputs.bukkit.message.*;
@@ -118,8 +119,8 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         // TODO: WIP
         // api.registerInputFactory(new ChatInputFactory(keyProvider.getKey("input/chat")));
         if (versionHandler != null) {
-            api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey("input/anvil"), versionHandler));
-            api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey("input/command_block"), versionHandler));
+            api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey(Inputs.ANVIL.substring(13)), versionHandler));
+            api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey(Inputs.COMMAND_BLOCK.substring(13)), versionHandler));
         }
     }
 
