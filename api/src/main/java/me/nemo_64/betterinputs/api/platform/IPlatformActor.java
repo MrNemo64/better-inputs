@@ -9,5 +9,7 @@ public interface IPlatformActor<H> {
     H getHandle();
 
     <P> IPlatformActor<P> as(Class<P> clazz);
+    
+    void sendMessage(String message);
 
 }

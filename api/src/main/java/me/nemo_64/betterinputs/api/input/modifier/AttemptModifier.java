@@ -1,22 +1,31 @@
 package me.nemo_64.betterinputs.api.input.modifier;
 
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.nemo_64.betterinputs.api.input.InputProvider;
+import me.nemo_64.betterinputs.api.platform.IPlatformActor;
 
 public final class AttemptModifier<T> extends AbstractModifier<T> {
 
     private final Predicate<T> validator;
+    private final Consumer<IPlatformActor<?>> messageSupplier;
 
     private int attempts = 0;
 
-    public AttemptModifier(int attempts, Predicate<T> validator) {
+    public AttemptModifier(int attempts, Predicate<T> validator, final Consumer<IPlatformActor<?>> messageSupplier) {
         super(true);
         if (attempts <= 0) {
             throw new IllegalArgumentException("Int attempts has to be higher than 0");
         }
         this.attempts = attempts;
         this.validator = validator;
+        this.messageSupplier = Objects.requireNonNull(messageSupplier, "Consumer messageSupplier can't be null");
+    }
+
+    public AttemptModifier(int attempts, Predicate<T> validator) {
+        this(attempts, validator, (actor) -> actor.sendMessage("Please try again"));
     }
 
     public boolean attempt(T input) {
@@ -28,6 +37,10 @@ public final class AttemptModifier<T> extends AbstractModifier<T> {
         }
         expire();
         return false;
+    }
+    
+    public final void sendMessage(IPlatformActor<?> actor) {
+        messageSupplier.accept(actor);
     }
 
     @Override

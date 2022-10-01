@@ -1,6 +1,8 @@
 package me.nemo_64.betterinputs.bukkit.input.anvil;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import me.nemo_64.betterinputs.api.input.InputFactory;
 import me.nemo_64.betterinputs.api.platform.IPlatformActor;
@@ -26,8 +28,17 @@ public final class AnvilInputFactory extends InputFactory<String, AnvilInput> {
 
     @Override
     protected AnvilInput provide(IPlatformActor<?> actor, ArgumentMap map) {
-        return new AnvilInput(versionHandler, listener.getContainer(), map.get("name", String.class).orElse("Anvil Input"),
-            map.get("item", ItemStack.class).orElse(null));
+        ItemStack itemStack = map.get("item", ItemStack.class).orElse(null);
+        if (itemStack == null || itemStack.getType().isAir()) {
+            String itemName = map.get("item", String.class).orElse(null);
+            if (itemName != null) {
+                itemStack = new ItemStack(Material.PAPER);
+                ItemMeta meta = itemStack.getItemMeta();
+                meta.setDisplayName(itemName);
+                itemStack.setItemMeta(meta);
+            }
+        }
+        return new AnvilInput(versionHandler, listener.getContainer(), map.get("name", String.class).orElse("Anvil Input"), itemStack);
     }
 
 }

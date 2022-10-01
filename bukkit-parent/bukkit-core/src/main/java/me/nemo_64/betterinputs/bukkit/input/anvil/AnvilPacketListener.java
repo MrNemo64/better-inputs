@@ -23,6 +23,9 @@ public final class AnvilPacketListener implements IPacketListener {
 
     @PacketHandler
     public boolean receiveRenameItem(PlayerAdapter player, PacketInRenameItem packet) {
+        if (packet.getName() == null || packet.getName().isBlank()) {
+            return true;
+        }
         player.setData("text", packet.getName());
         return true;
     }
@@ -32,7 +35,7 @@ public final class AnvilPacketListener implements IPacketListener {
         if (packet.getSlot() != 2) {
             return true;
         }
-        if (!player.getData("input", AnvilInput.class).complete(player)) {
+        if (player.getData("input", AnvilInput.class).complete(player)) {
             player.closeMenu();
             return true;
         }

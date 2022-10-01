@@ -21,8 +21,6 @@ public final class AnvilInput extends AbstractInput<String> {
     private final ItemStack item;
 
     private int containerId = -1;
-    
-    // TODO: WIP Anvil Input
 
     public AnvilInput(final VersionHandler versionHandler, final PacketContainer listener, final String name, final ItemStack item) {
         this.versionHandler = versionHandler;
@@ -41,7 +39,8 @@ public final class AnvilInput extends AbstractInput<String> {
             throw new IllegalStateException("Unsupported actor");
         }
         PlayerAdapter player = versionHandler.getPlayer(bukkitPlayer);
-        containerId = (item == null ? player.createAnvilMenu(name) : player.createAnvilMenu(name, item));
+        player.setData("input", this);
+        containerId = item == null ? player.createAnvilMenu(name) : player.createAnvilMenu(name, item);
         listener.addUser(player.getUniqueId());
     }
 
@@ -51,8 +50,7 @@ public final class AnvilInput extends AbstractInput<String> {
         String text = player.getData("text", String.class);
         if (modifier != null) {
             if (!modifier.attempt(text)) {
-                // TODO: Move to modifier maybe? => Probably yes
-                player.asBukkit().sendMessage("Please try again!");
+                modifier.sendMessage(provider().getActor());
                 return false;
             }
         }

@@ -25,4 +25,7 @@ public final class InvalidActor<H> implements IPlatformActor<H> {
         return get();
     }
 
+    @Override
+    public void sendMessage(String message) {}
+
 }

@@ -1,5 +1,8 @@
 package me.nemo_64.betterinputs.bukkit.nms.v1_19_R1;
 
+import java.util.concurrent.CompletableFuture;
+
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -47,6 +50,9 @@ public final class PlayerAdapter1_19_R1 extends PlayerAdapter {
 
     @Override
     public int createAnvilMenu(String name, ItemStack itemStack) {
+        if(!Bukkit.isPrimaryThread()) {
+            return CompletableFuture.supplyAsync(() -> createAnvilMenu(name, itemStack), network.packetManager().mainService()).join();
+        }
         AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory(), MinecraftConstant1_19_R1.BETTER_NULL);
         menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         menu.setTitle(Component.literal(name));

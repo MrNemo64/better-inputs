@@ -23,6 +23,14 @@ public abstract class PacketManager {
         this.mainService = handler.mainService();
         this.asyncService = handler.asyncService();
     }
+    
+    public final ExecutorService mainService() {
+        return mainService;
+    }
+    
+    public final ExecutorService asyncService() {
+        return asyncService;
+    }
 
     public final PacketContainer register(IPacketListener listener) {
         lock.readLock().lock();

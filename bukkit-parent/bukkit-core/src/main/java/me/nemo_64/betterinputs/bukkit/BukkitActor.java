@@ -29,4 +29,9 @@ public final class BukkitActor<H extends CommandSender> implements IPlatformActo
         return InvalidActor.get();
     }
 
+    @Override
+    public void sendMessage(String message) {
+        handle.sendMessage(message);
+    }
+
 }

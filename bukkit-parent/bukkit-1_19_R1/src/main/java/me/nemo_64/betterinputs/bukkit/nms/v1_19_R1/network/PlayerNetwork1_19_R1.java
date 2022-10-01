@@ -22,6 +22,10 @@ public class PlayerNetwork1_19_R1 implements IPlayerNetwork {
         this.player = player;
         add(player.getChannel());
     }
+    
+    public PacketManager1_19_R1 packetManager() {
+        return packetManager;
+    }
 
     private void remove(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
