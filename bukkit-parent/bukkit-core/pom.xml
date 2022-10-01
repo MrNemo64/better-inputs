@@ -21,10 +21,25 @@
             <version>0.1.0-10191ac-SNAPSHOT</version>
         </dependency>
         
-        <!-- Bukkit Version Compat -->
+        <!-- Bukkit Version Compat (1.17 - 1.19.2) -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>bukkit-1_19_R1</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_18_R2</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_18_R1</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_17_R1</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
