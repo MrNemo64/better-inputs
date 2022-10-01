@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.concurrent.ExecutorService;
 
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,6 +26,7 @@ import me.nemo_64.betterinputs.bukkit.command.provider.BetterInputsProvider;
 import me.nemo_64.betterinputs.bukkit.command.provider.LoggerProvider;
 import me.nemo_64.betterinputs.bukkit.input.Inputs;
 import me.nemo_64.betterinputs.bukkit.input.anvil.AnvilInputFactory;
+import me.nemo_64.betterinputs.bukkit.input.chat.ChatInputFactory;
 import me.nemo_64.betterinputs.bukkit.input.command_block.CommandBlockInputFactory;
 import me.nemo_64.betterinputs.bukkit.message.*;
 import me.nemo_64.betterinputs.bukkit.message.impl.BetterMessageProviderFactory;
@@ -88,6 +90,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         registerMessages(messageManager);
         registerArgumentTypes(commandManager.getRegistry());
         registerCommands(commandManager);
+        registerListeners(getServer().getPluginManager());
         registerInputFactories();
         if (versionHandler != null) {
             versionHandler.enable();
@@ -114,10 +117,13 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     private void registerCommands(CommandManager manager) {
         manager.register(BetterInputsCommand.class);
     }
+    
+    private void registerListeners(PluginManager pluginManager) {
+        pluginManager.registerEvents(new BukkitPluginListener(api), this);
+    }
 
     private void registerInputFactories() {
-        // TODO: WIP
-        // api.registerInputFactory(new ChatInputFactory(keyProvider.getKey("input/chat")));
+         api.registerInputFactory(new ChatInputFactory(keyProvider.getKey(Inputs.CHAT.substring(13)), this));
         if (versionHandler != null) {
             api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey(Inputs.ANVIL.substring(13)), versionHandler));
             api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey(Inputs.COMMAND_BLOCK.substring(13)), versionHandler));

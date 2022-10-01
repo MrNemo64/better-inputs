@@ -124,4 +124,15 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         keys.remove(provider.getClassLoader());
     }
 
+    void unregister(Plugin plugin) {
+        if (plugin == null) {
+            return;
+        }
+        ClassLoader loader = plugin.getClass().getClassLoader();
+        if (!keys.containsKey(loader)) {
+            return;
+        }
+        keys.get(loader).unregisterAll();
+    }
+
 }
