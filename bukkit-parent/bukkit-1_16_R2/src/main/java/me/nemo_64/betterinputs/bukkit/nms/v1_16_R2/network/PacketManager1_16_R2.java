@@ -1,4 +1,4 @@
-package me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network;
+package me.nemo_64.betterinputs.bukkit.nms.v1_16_R2.network;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,11 +12,11 @@ import me.nemo_64.betterinputs.api.util.argument.NotEnoughArgumentsException;
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacket;
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacketOut;
 import me.nemo_64.betterinputs.bukkit.nms.packet.listener.PacketManager;
-import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.PlayerAdapter1_17_R1;
-import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.VersionHandler1_17_R1;
-import net.minecraft.network.protocol.Packet;
+import me.nemo_64.betterinputs.bukkit.nms.v1_16_R2.PlayerAdapter1_16_R2;
+import me.nemo_64.betterinputs.bukkit.nms.v1_16_R2.VersionHandler1_16_R2;
+import net.minecraft.server.v1_16_R2.Packet;
 
-public final class PacketManagerme extends PacketManager {
+public final class PacketManager1_16_R2 extends PacketManager {
 
     private static class NmsPacketBuilder<P extends Packet<?>> {
 
@@ -38,7 +38,7 @@ public final class PacketManagerme extends PacketManager {
     private Map<Class<?>, NmsPacketBuilder<?>> nmsBuilders = new HashMap<>();
     private Map<Class<?>, Function<ArgumentMap, ? extends AbstractPacketOut>> adapterBuilders = new HashMap<>();
 
-    public PacketManagerme(VersionHandler1_17_R1 handler) {
+    public PacketManager1_16_R2(VersionHandler1_16_R2 handler) {
         super(handler);
     }
 
@@ -66,7 +66,7 @@ public final class PacketManagerme extends PacketManager {
         adapterBuilders.put(packetType, function);
     }
 
-    final boolean call(PlayerAdapter1_17_R1 player, Packet<?> nmsPacket) {
+    final boolean call(PlayerAdapter1_16_R2 player, Packet<?> nmsPacket) {
         NmsPacketBuilder<?> builder = nmsBuilders.get(nmsPacket.getClass());
         if (builder == null) {
             return false;

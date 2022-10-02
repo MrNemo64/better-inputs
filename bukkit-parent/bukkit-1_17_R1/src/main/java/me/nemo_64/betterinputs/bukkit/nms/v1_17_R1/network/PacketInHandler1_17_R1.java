@@ -6,11 +6,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.minecraft.network.protocol.Packet;
 
 @Sharable
-public final class PacketInHandlerme extends ChannelInboundHandlerAdapter {
+public final class PacketInHandler1_17_R1 extends ChannelInboundHandlerAdapter {
 
-    private final PlayerNetworkme network;
+    private final PlayerNetwork1_17_R1 network;
 
-    public PacketInHandlerme(final PlayerNetworkme network) {
+    public PacketInHandler1_17_R1(final PlayerNetwork1_17_R1 network) {
         this.network = network;
     }
 

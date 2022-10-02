@@ -21,7 +21,7 @@
             <version>0.1.0-10191ac-SNAPSHOT</version>
         </dependency>
         
-        <!-- Bukkit Version Compat (1.17 - 1.19.2) -->
+        <!-- Bukkit Version Compat (1.16 - 1.19.2) -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>bukkit-1_19_R1</artifactId>
@@ -40,6 +40,21 @@
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>bukkit-1_17_R1</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_16_R3</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_16_R2</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_16_R1</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

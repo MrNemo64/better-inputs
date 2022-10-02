@@ -11,8 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import io.netty.channel.Channel;
 import me.nemo_64.betterinputs.bukkit.nms.PlayerAdapter;
 import me.nemo_64.betterinputs.bukkit.nms.packet.AbstractPacketOut;
-import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PacketManagerme;
-import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PlayerNetworkme;
+import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PacketManager1_17_R1;
+import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PlayerNetwork1_17_R1;
 import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.util.MinecraftConstant1_17_R1;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
@@ -24,23 +24,23 @@ import net.minecraft.world.inventory.AnvilMenu;
 
 public final class PlayerAdapter1_17_R1 extends PlayerAdapter {
 
-    private final PlayerNetworkme network;
+    private final PlayerNetwork1_17_R1 network;
 
     private final CraftPlayer bukkit;
     private final ServerPlayer minecraft;
 
-    public PlayerAdapter1_17_R1(PacketManagerme packetManager, Player player) {
+    public PlayerAdapter1_17_R1(PacketManager1_17_R1 packetManager, Player player) {
         super(player.getUniqueId());
         this.bukkit = (CraftPlayer) player;
         this.minecraft = bukkit.getHandle();
-        this.network = new PlayerNetworkme(packetManager, this);
+        this.network = new PlayerNetwork1_17_R1(packetManager, this);
     }
 
     final void terminate() {
         network.setActive(false);
     }
 
-    public PlayerNetworkme getNetwork() {
+    public PlayerNetwork1_17_R1 getNetwork() {
         return network;
     }
 

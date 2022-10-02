@@ -8,17 +8,17 @@ import me.nemo_64.betterinputs.bukkit.nms.PlayerAdapter;
 import me.nemo_64.betterinputs.bukkit.nms.VersionHandler;
 import me.nemo_64.betterinputs.bukkit.nms.packet.*;
 import me.nemo_64.betterinputs.bukkit.nms.packet.listener.PacketManager;
-import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PacketManagerme;
+import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network.PacketManager1_17_R1;
 import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.packet.*;
 import net.minecraft.network.protocol.game.*;
 
 public final class VersionHandler1_17_R1 extends VersionHandler {
 
-    private final PacketManagerme packetManager;
+    private final PacketManager1_17_R1 packetManager;
 
     public VersionHandler1_17_R1(IServiceProvider provider) {
         super(provider);
-        this.packetManager = new PacketManagerme(this);
+        this.packetManager = new PacketManager1_17_R1(this);
     }
 
     @Override

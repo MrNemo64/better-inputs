@@ -6,24 +6,24 @@ import me.nemo_64.betterinputs.bukkit.nms.IPlayerNetwork;
 import me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.PlayerAdapter1_17_R1;
 import net.minecraft.network.protocol.Packet;
 
-public class PlayerNetworkme implements IPlayerNetwork {
+public class PlayerNetwork1_17_R1 implements IPlayerNetwork {
 
-    private final PacketManagerme packetManager;
+    private final PacketManager1_17_R1 packetManager;
 
-    private final PacketInHandlerme packetIn = new PacketInHandlerme(this);
-    private final PacketOutHandlerme packetOut = new PacketOutHandlerme(this);
+    private final PacketInHandler1_17_R1 packetIn = new PacketInHandler1_17_R1(this);
+    private final PacketOutHandler1_17_R1 packetOut = new PacketOutHandler1_17_R1(this);
 
     private final PlayerAdapter1_17_R1 player;
 
     private boolean active = true;
 
-    public PlayerNetworkme(final PacketManagerme packetManager, final PlayerAdapter1_17_R1 player) {
+    public PlayerNetwork1_17_R1(final PacketManager1_17_R1 packetManager, final PlayerAdapter1_17_R1 player) {
         this.packetManager = packetManager;
         this.player = player;
         add(player.getChannel());
     }
     
-    public PacketManagerme packetManager() {
+    public PacketManager1_17_R1 packetManager() {
         return packetManager;
     }
 

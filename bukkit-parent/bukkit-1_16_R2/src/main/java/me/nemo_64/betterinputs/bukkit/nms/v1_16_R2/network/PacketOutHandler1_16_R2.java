@@ -1,17 +1,17 @@
-package me.nemo_64.betterinputs.bukkit.nms.v1_17_R1.network;
+package me.nemo_64.betterinputs.bukkit.nms.v1_16_R2.network;
 
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.v1_16_R2.Packet;
 
 @Sharable
-public final class PacketOutHandlerme extends ChannelOutboundHandlerAdapter {
+public final class PacketOutHandler1_16_R2 extends ChannelOutboundHandlerAdapter {
 
-    private final PlayerNetworkme network;
+    private final PlayerNetwork1_16_R2 network;
 
-    public PacketOutHandlerme(final PlayerNetworkme network) {
+    public PacketOutHandler1_16_R2(final PlayerNetwork1_16_R2 network) {
         this.network = network;
     }
 
