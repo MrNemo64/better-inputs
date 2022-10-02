@@ -101,6 +101,7 @@
                             <shadedPattern>${project.groupId}.shaded.bstats</shadedPattern>
                         </relocation>
                     </relocations>
+                    <finalName>betterinputs-bukkit-${project.version}</finalName>
                 </configuration>
             </plugin>
         </plugins>
