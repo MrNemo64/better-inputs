@@ -8,9 +8,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
+  <!---
   <a href="https://github.com/MrNemo64/better-inputs">
     <img src="images/logo.png" alt="Logo" width="96" height="96"/>
   </a>
+  --->
 
   <h3 align="center">BetterInputs</h3>
 
