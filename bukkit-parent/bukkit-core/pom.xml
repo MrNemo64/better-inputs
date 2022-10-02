@@ -21,6 +21,13 @@
             <version>0.1.0-10191ac-SNAPSHOT</version>
         </dependency>
         
+        <!-- bStats -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        
         <!-- Bukkit Version Compat (1.16 - 1.19.2) -->
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
@@ -88,6 +95,10 @@
                         <relocation>
                             <pattern>me.lauriichan.laylib</pattern>
                             <shadedPattern>${project.groupId}.shaded.laylib</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>${project.groupId}.shaded.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

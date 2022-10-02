@@ -1,8 +1,17 @@
 package me.nemo_64.betterinputs.bukkit;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
+import org.bstats.charts.DrilldownPie;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
@@ -39,9 +48,10 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     private static final String FORMAT = BetterInputsPlugin.class.getPackageName() + ".nms.%s.VersionHandler%s";
 
-    private final BetterInputsBukkit api = new BetterInputsBukkit();
+    private final BetterInputsBukkit api = new BetterInputsBukkit(this);
 
     private VersionHandler versionHandler;
+    private String coreVersion;
     private IPlatformKeyProvider keyProvider;
 
     private final ExecutorService mainService = new BukkitExecutorService(this, false);
@@ -50,6 +60,10 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     private ISimpleLogger logger;
     private CommandManager commandManager;
     private MessageManager messageManager;
+
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, AtomicInteger>> statProviderType = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, AtomicInteger> statInputType = new ConcurrentHashMap<>();
+    private final AtomicInteger statCreatedInput = new AtomicInteger(0);
 
     /*
      * Setup
@@ -85,6 +99,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     @Override
     public void onEnable() {
+        setupMetrics();
         commandManager.setInjector(new BukkitCommandInjector(commandManager, messageManager, this));
         keyProvider = api.getKeyProvider(this);
         registerMessages(messageManager);
@@ -117,17 +132,57 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
     private void registerCommands(CommandManager manager) {
         manager.register(BetterInputsCommand.class);
     }
-    
+
     private void registerListeners(PluginManager pluginManager) {
         pluginManager.registerEvents(new BukkitPluginListener(api), this);
     }
 
     private void registerInputFactories() {
-         api.registerInputFactory(new ChatInputFactory(keyProvider.getKey(Inputs.CHAT.substring(13)), this));
+        api.registerInputFactory(new ChatInputFactory(keyProvider.getKey(Inputs.CHAT.substring(13)), this));
         if (versionHandler != null) {
             api.registerInputFactory(new AnvilInputFactory(keyProvider.getKey(Inputs.ANVIL.substring(13)), versionHandler));
             api.registerInputFactory(new CommandBlockInputFactory(keyProvider.getKey(Inputs.COMMAND_BLOCK.substring(13)), versionHandler));
         }
+    }
+
+    private void setupMetrics() {
+        Metrics metrics = new Metrics(this, 16546);
+        metrics.addCustomChart(new SingleLineChart("input_created", () -> {
+            return statCreatedInput.getAndSet(0);
+        }));
+        metrics.addCustomChart(new AdvancedPie("default_provider_type", () -> {
+            HashMap<String, Integer> map = new HashMap<>();
+            Map<String, AtomicInteger> providedMap = statProviderType.get(keyProvider.getNamespace());
+            for (String key : providedMap.keySet()) {
+                String name = key.substring(6);
+                map.put(name, providedMap.get(key).get());
+            }
+            return map;
+        }));
+        metrics.addCustomChart(new DrilldownPie("plugin_providers", () -> {
+            HashMap<String, Map<String, Integer>> allMap = new HashMap<>();
+            for (String key : statProviderType.keySet()) {
+                HashMap<String, Integer> map = new HashMap<>();
+                Map<String, AtomicInteger> providedMap = statProviderType.get(key);
+                for (String providedKey : providedMap.keySet()) {
+                    map.put(providedKey, providedMap.get(providedKey).get());
+                }
+                allMap.put(key, map);
+            }
+            statProviderType.clear();
+            return allMap;
+        }));
+        metrics.addCustomChart(new AdvancedPie("input_type", () -> {
+            HashMap<String, Integer> map = new HashMap<>();
+            for (String key : statInputType.keySet()) {
+                map.put(key, statInputType.get(key).get());
+            }
+            statInputType.clear();
+            return map;
+        }));
+        metrics.addCustomChart(new SimplePie("core_version", () -> {
+            return coreVersion;
+        }));
     }
 
     /*
@@ -140,6 +195,24 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
             versionHandler.disable();
         }
         api.shutdown();
+    }
+
+    /*
+     * Stats
+     */
+
+    final void updateStat(String providerType, Class<?> inputType) {
+        statCreatedInput.addAndGet(1);
+        int index = providerType.indexOf(':');
+        String namespace = providerType.substring(0, index);
+        String key = providerType.substring(index + 1, providerType.length());
+        statProviderType.computeIfAbsent(namespace, (i) -> new ConcurrentHashMap<>()).computeIfAbsent(key, (i) -> new AtomicInteger(0))
+            .addAndGet(1);
+        String inputName = inputType.getName();
+        if (inputName.startsWith("java.lang.")) {
+            inputName = inputType.getSimpleName();
+        }
+        statInputType.computeIfAbsent(inputName, (i) -> new AtomicInteger(0)).addAndGet(1);
     }
 
     /*
@@ -175,7 +248,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
 
     private final VersionHandler initVersionHandler() {
         String version = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
-        String path = String.format(FORMAT, version, version.substring(1));
+        String path = String.format(FORMAT, version, (coreVersion = version.substring(1)));
         Class<?> clazz = ClassUtil.findClass(path);
         if (clazz == null || !VersionHandler.class.isAssignableFrom(clazz)) {
             throw new IllegalStateException("Couldn't find class '" + path + "'!");

@@ -23,8 +23,14 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
 
     private final ConcurrentHashMap<ClassLoader, BukkitKeyProvider> keys = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, InputFactory<?, ?>> factories = new ConcurrentHashMap<>();
-
+    private final BetterInputsPlugin plugin;
+    
     private List<String> inputKeys;
+    
+    public BetterInputsBukkit(final BetterInputsPlugin plugin) {
+        this.plugin = plugin;
+    }
+    
 
     final void shutdown() {
         inputTick.shutdown();
@@ -117,6 +123,11 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         inputKeys = null;
         factory.onUnregister();
         return true;
+    }
+    
+    @Override
+    protected void updateInputStats(String providerType, Class<?> inputType) {
+        plugin.updateStat(providerType, inputType);
     }
 
     void removeProvider(BukkitKeyProvider provider) {

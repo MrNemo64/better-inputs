@@ -193,8 +193,12 @@ public abstract class BetterInputs<P> {
         Objects.requireNonNull(builder.actor(), "Actor can't be null (Maybe invalid actor?)");
         InputFactory<T, ? extends AbstractInput<T>> factory = getInputFactory(builder.type(), builder.inputType())
             .orElseThrow(() -> new IllegalArgumentException("Invalid InputFactory type '" + builder.type() + "'!"));
-        return new InputProvider<>(builder.actor(), inputTick, factory.build(builder.actor(), builder.argumentMap()),
+        InputProvider<T> provider = new InputProvider<>(builder.actor(), inputTick, factory.build(builder.actor(), builder.argumentMap()),
             builder.exceptionHandler(), builder.cancelListener());
+        updateInputStats(builder.type(), builder.inputType());
+        return provider;
     }
+
+    protected abstract void updateInputStats(String providerType, Class<?> inputType);
 
 }
