@@ -8,6 +8,14 @@
     </parent>
     <artifactId>api</artifactId>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub MrNemo64 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/MrNemo64/better-inputs</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>me.lauriichan.laylib</groupId>
@@ -15,4 +23,17 @@
             <version>0.1.0-10191ac-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <show>public</show>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
