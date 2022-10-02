@@ -150,7 +150,7 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         metrics.addCustomChart(new SingleLineChart("input_created", () -> {
             return statCreatedInput.getAndSet(0);
         }));
-        metrics.addCustomChart(new DrilldownPie("plugin_providers", () -> {
+        metrics.addCustomChart(new DrilldownPie("input_providers", () -> {
             HashMap<String, Map<String, Integer>> allMap = new HashMap<>();
             for (String key : statProviderType.keySet()) {
                 HashMap<String, Integer> map = new HashMap<>();
