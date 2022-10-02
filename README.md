@@ -8,11 +8,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <!---
   <a href="https://github.com/MrNemo64/better-inputs">
     <img src="images/logo.png" alt="Logo" width="96" height="96"/>
   </a>
-  --->
 
   <h3 align="center">BetterInputs</h3>
 
@@ -47,10 +45,16 @@
         <li>
           <a href="#setup">Setup</a>
           <ul>
-            <a href="#maven">Maven</a>
+            <li><a href="#maven">Maven</a></li>
           </ul>
         </li>
-        <li><a href="#usage">Usage</a></li>
+        <li>
+          <a href="#usage">Usage</a>
+          <ul>
+            <li><a href="#using-the-api-to-get-input">Using the api to get input</a></li>
+            <li><a href="#using-the-api-to-provide-input">Using the api to provide input</a></li>
+          </ul>
+        </li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
