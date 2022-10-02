@@ -38,7 +38,7 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     }
 
     @Override
-    protected Plugin asPlatformIdentifyable(Object object) {
+    protected Plugin asPlatformIdentifiable(Object object) {
         if (!(object instanceof Plugin)) {
             return null;
         }

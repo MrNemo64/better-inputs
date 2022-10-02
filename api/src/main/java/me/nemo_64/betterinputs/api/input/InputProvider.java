@@ -64,6 +64,11 @@ public final class InputProvider<V> {
         this.cancelListener = cancelListener;
     }
 
+    /**
+     * Gets the future of this process and starts the input process on first call
+     * 
+     * @return the future
+     */
     public StagedFuture<V> asFuture() {
         if (input.provider() == null) {
             input.provider(this);
@@ -71,6 +76,13 @@ public final class InputProvider<V> {
         return future;
     }
 
+    /**
+     * Adds a input modifier
+     * 
+     * @param  modifier the modifier to be added
+     * 
+     * @return          the same input provider
+     */
     public InputProvider<V> withModifier(AbstractModifier<V> modifier) {
         Objects.requireNonNull(modifier, "Modifier can't be null");
         if (future.isComplete() || modifiers.containsKey(modifier.getClass())) {
@@ -80,6 +92,15 @@ public final class InputProvider<V> {
         return this;
     }
 
+    /**
+     * Gets an input modifier
+     * 
+     * @param  <M>          the provided modifier type
+     * @param  modifierType the input modifier type
+     * 
+     * @return              an {@code java.lang.Optional} containing the input
+     *                          modifier or {@code null}
+     */
     public <M extends AbstractModifier<V>> Optional<M> getModifier(Class<M> modifierType) {
         if (modifierType == null) {
             return Optional.empty();
@@ -92,6 +113,14 @@ public final class InputProvider<V> {
         return Optional.empty();
     }
 
+    /**
+     * Checks if a modifier is set
+     * 
+     * @param  modifierType the modifier type to be checked
+     * 
+     * @return              {@code true} if the modifier type is set otherwise
+     *                          {@code false}
+     */
     public boolean hasModifier(Class<? extends AbstractModifier<V>> modifierType) {
         if (modifierType == null) {
             return false;
@@ -104,15 +133,35 @@ public final class InputProvider<V> {
         return false;
     }
 
+    /**
+     * Sets the modifier exception handler
+     * 
+     * @param  modifierExceptionHandler the handler to be set
+     * 
+     * @return                          the same input provider
+     */
     public InputProvider<V> withModifierExceptionHandler(BiConsumer<AbstractModifier<V>, Throwable> modifierExceptionHandler) {
         this.modifierExceptionHandler = modifierExceptionHandler;
         return this;
     }
 
+    /**
+     * Tries to cancel the input process
+     * 
+     * @return {@code true} if the process was cancelled otherwise {@code false}
+     */
     public boolean cancel() {
         return cancel("Manual cancel");
     }
 
+    /**
+     * Tries to cancel the input process with a specified reason
+     * 
+     * @param  reason the reason why the process was cancelled
+     * 
+     * @return        {@code true} if the process was cancelled otherwise
+     *                    {@code false}
+     */
     public boolean cancel(String reason) {
         if (input.isCancelled()) {
             return true;
@@ -126,19 +175,41 @@ public final class InputProvider<V> {
         return false;
     }
 
+    /**
+     * Checks if the input process is cancelled
+     * 
+     * @return {@code true} if process is cancelled otherwise {@code false}
+     */
     public boolean isCancelled() {
         return input.isCancelled();
     }
 
+    /**
+     * Checks if the input is available already
+     * 
+     * @return {@code true} if the input is available otherwise {@code false}
+     */
     public boolean isAvailable() {
         return future.isComplete();
     }
 
+    /**
+     * Gets the wrapped owning actor
+     * 
+     * @return the actor
+     */
     public IPlatformActor<?> getActor() {
         return actor;
     }
 
-    public V get() {
+    /**
+     * Gets the input of this input process
+     * 
+     * @return                       the input provided by the process
+     * 
+     * @throws IllegalStateException if the process isn't done yet
+     */
+    public V get() throws IllegalStateException {
         return future.get();
     }
 

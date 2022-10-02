@@ -33,34 +33,160 @@ public abstract class BetterInputs<P> {
         inputTick.start();
     }
 
-    protected abstract P asPlatformIdentifyable(Object object);
+    /**
+     * Converts a object into a platform identifiable object
+     * 
+     * @param  object the object to be converted
+     * 
+     * @return        the platform identifiable object or {@code null}
+     */
+    protected abstract P asPlatformIdentifiable(Object object);
 
+    /**
+     * Gets all known input factory keys as {@code java.lang.String}
+     * 
+     * @return the list of all keys
+     */
     public abstract List<String> getKeys();
-    
+
+    /**
+     * Gets the key provider for the provided object which is supposed to be a
+     * platform identifiable object
+     * 
+     * @param  object                   the object that is supposed to be a platform
+     *                                      identifiable object
+     * 
+     * @return                          an {@code java.lang.Optional} containing the
+     *                                      key provider for the platform
+     *                                      identifiable object or {@code null} if
+     *                                      the object was not a platform
+     *                                      identifiable object
+     * 
+     * @throws IllegalArgumentException if the platform identifiable is not valid
+     *                                      for this platform
+     */
     public final Optional<IPlatformKeyProvider> tryGetKeyProvider(Object object) {
-        P identifyable = asPlatformIdentifyable(object);
+        P identifyable = asPlatformIdentifiable(object);
         if (identifyable == null) {
             return Optional.empty();
         }
         return Optional.of(getKeyProvider(identifyable));
     }
 
-    public abstract IPlatformKeyProvider getKeyProvider(P platformIdentifyable);
+    /**
+     * Gets a key provider for the platform identifiable object
+     * 
+     * @param  platformIdentifiable     the platform identifiable object
+     * 
+     * @return                          the key provider for the
+     *                                      {@code platformIdentifiable}
+     * 
+     * @throws NullPointerException     if the platform identifiable is {@code null}
+     * @throws IllegalArgumentException if the platform identifiable is not valid
+     *                                      for this platform
+     */
+    public abstract IPlatformKeyProvider getKeyProvider(P platformIdentifiable) throws NullPointerException, IllegalArgumentException;
 
+    /**
+     * Gets a wrapped instance of the provided actor
+     * 
+     * @param  <E>   the type of the actor
+     * @param  actor the provided actor
+     * 
+     * @return       an {@code java.util.Optional} containing the wrapped actor or
+     *                   {@code null} if the actor is not supported or if the actor
+     *                   was {@code null}
+     */
     public abstract <E> Optional<IPlatformActor<E>> getActor(E actor);
-    
+
+    /**
+     * Gets a factory by key
+     * 
+     * @param  namespacedKey        the key of the input factory
+     * 
+     * @return                      an {@code java.util.Optional} containing the
+     *                                  requested input factory or {@code null}
+     * 
+     * @throws NullPointerException if {@code namespacedKey} is {@code null}
+     */
     public abstract Optional<InputFactory<?, ?>> getInputFactory(String namespacedKey);
 
-    public abstract <T> Optional<InputFactory<T, ? extends AbstractInput<T>>> getInputFactory(String namespacedKey, Class<T> inputType);
+    /**
+     * Gets a factory by key and input type
+     * 
+     * @param  <T>                  the provided input type
+     * @param  namespacedKey        the key of the input factory
+     * @param  inputType            the input type provided by the input provider
+     *                                  type that the factory is creating
+     * 
+     * @return                      an {@code java.util.Optional} containing the
+     *                                  requested input factory or {@code null}
+     * 
+     * @throws NullPointerException if either {@code namespacedKey} or
+     *                                  {@code inputType} are {@code null}
+     */
+    public abstract <T> Optional<InputFactory<T, ? extends AbstractInput<T>>> getInputFactory(String namespacedKey, Class<T> inputType)
+        throws NullPointerException;
 
-    public abstract <T> void registerInputFactory(InputFactory<T, ? extends AbstractInput<T>> factory);
+    /**
+     * Registers a new input factory
+     * 
+     * @param  <T>                      the input type of the input provider type
+     * @param  factory                  the factory for the input provider type
+     * 
+     * 
+     * @throws NullPointerException     if {@code factory} is {@code null}
+     * @throws IllegalArgumentException if the provided key of the factory was not
+     *                                      created by this api
+     * @throws IllegalStateException    if there is already a input factory with the
+     *                                      provided key
+     */
+    public abstract <T> void registerInputFactory(InputFactory<T, ? extends AbstractInput<T>> factory)
+        throws NullPointerException, IllegalArgumentException, IllegalStateException;
 
-    public abstract boolean unregisterInputFactory(IPlatformKey platformKey);
+    /**
+     * Unregisters a input factory based on the provided key
+     * 
+     * @param  platformKey              the key of the input factory
+     * 
+     * @return                          {@code true} if the input factory was
+     *                                      successfully unregistered otherwise
+     *                                      {@code false}
+     * 
+     * @throws NullPointerException     if no key is provided
+     * @throws IllegalArgumentException if the provided key was not created by this
+     *                                      api
+     */
+    public abstract boolean unregisterInputFactory(IPlatformKey platformKey) throws NullPointerException, IllegalArgumentException;
 
+    /**
+     * Creates a new input builder
+     * 
+     * @param  <T>  the provided input type
+     * @param  type the input type class
+     * 
+     * @return      the new input builder
+     */
     public final <T> InputBuilder<T> createInput(Class<T> type) {
         return new InputBuilder<>(this, type);
     }
 
+    /**
+     * Creates a new input provider based on the {@code builder}
+     * 
+     * @param  builder                     the input builder that describes the
+     *                                         input process
+     * 
+     * @return                             the new input provider
+     * 
+     * @throws NullPointerException        if the set actor was invalid or wasn't
+     *                                         set at all
+     * @throws IllegalArgumentException    if there is no InputFactory with the set
+     *                                         key
+     * @throws NotEnoughArgumentsException if the provided parameters were not
+     *                                         enough to create the requested input
+     *                                         provider type
+     */
     public final <T> InputProvider<T> createProvider(InputBuilder<T> builder)
         throws NullPointerException, IllegalArgumentException, NotEnoughArgumentsException {
         Objects.requireNonNull(builder, "InputBuilder can't be null");

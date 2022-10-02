@@ -9,6 +9,12 @@ public final class TimeoutModifier<T> extends AbstractModifier<T> {
 
     private long ticks = 0;
 
+    /**
+     * Creates a new {@code TimeoutModifier}
+     * 
+     * @param time the amount of time in the specified unit
+     * @param unit the unit that time was specified as
+     */
     public TimeoutModifier(long time, TickUnit unit) {
         super(true);
         Objects.requireNonNull(unit, "TickUnit can't be null");

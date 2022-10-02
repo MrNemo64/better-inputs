@@ -8,10 +8,20 @@ public abstract class AbstractUnique implements IUnique {
 
     private final IPlatformKey key;
 
-    public AbstractUnique(final IPlatformKey key) {
-        this.key = Objects.requireNonNull(key);
+    /**
+     * Creates a new unique object
+     * 
+     * @param key the key of this object
+     * 
+     * @throws NullPointerException if {@code key} is {@code null}
+     */
+    public AbstractUnique(final IPlatformKey key) throws NullPointerException {
+        this.key = Objects.requireNonNull(key, "Key can't be null");
     }
 
+    /**
+     * Gets the key of this unique object
+     */
     @Override
     public final IPlatformKey getKey() {
         return key;
