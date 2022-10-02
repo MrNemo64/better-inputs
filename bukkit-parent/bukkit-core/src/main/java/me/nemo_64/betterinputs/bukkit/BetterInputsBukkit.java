@@ -22,15 +22,15 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
     private static final Class<?> plugin_class_loader = ClassUtil.findClass("org.bukkit.plugin.java.PluginClassLoader");
 
     private final ConcurrentHashMap<ClassLoader, BukkitKeyProvider> keys = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, BukkitKeyProvider> namespaceToProvider = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, InputFactory<?, ?>> factories = new ConcurrentHashMap<>();
     private final BetterInputsPlugin plugin;
-    
+
     private List<String> inputKeys;
-    
+
     public BetterInputsBukkit(final BetterInputsPlugin plugin) {
         this.plugin = plugin;
     }
-    
 
     final void shutdown() {
         inputTick.shutdown();
@@ -61,7 +61,10 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         if (keys.containsKey(loader)) {
             return keys.get(loader);
         }
-        return keys.computeIfAbsent(loader, (i) -> new BukkitKeyProvider(this, plugin));
+        BukkitKeyProvider provider = new BukkitKeyProvider(this, plugin);
+        keys.put(loader, provider);
+        namespaceToProvider.put(provider.getNamespace(), provider);
+        return provider;
     }
 
     @SuppressWarnings("unchecked")
@@ -124,14 +127,22 @@ public final class BetterInputsBukkit extends BetterInputs<Plugin> {
         factory.onUnregister();
         return true;
     }
-    
+
     @Override
     protected void updateInputStats(String providerType, Class<?> inputType) {
-        plugin.updateStat(providerType, inputType);
+        int index = providerType.indexOf(':');
+        String namespace = providerType.substring(0, index);
+        BukkitKeyProvider provider = namespaceToProvider.get(namespace);
+        if (provider == null) {
+            plugin.updateStat(null, null, inputType);
+            return;
+        }
+        plugin.updateStat(provider.getPluginName(), providerType.substring(index + 1, providerType.length()), inputType);
     }
 
     void removeProvider(BukkitKeyProvider provider) {
         Objects.requireNonNull(provider, "BukkitKeyProvider can't be null!");
+        namespaceToProvider.remove(provider.getNamespace());
         keys.remove(provider.getClassLoader());
     }
 

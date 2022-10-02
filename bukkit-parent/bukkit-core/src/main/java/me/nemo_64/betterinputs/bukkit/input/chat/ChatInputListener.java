@@ -23,13 +23,13 @@ public final class ChatInputListener implements Listener {
         if(!map.containsKey(id)) {
             return;
         }
+        event.setCancelled(true);
         ChatInput input = map.get(id);
         String message = event.getMessage();
         AttemptModifier<String> modifier = (AttemptModifier<String>) input.provider().getModifier(AttemptModifier.class).orElse(null);
         if (modifier != null) {
             if (!modifier.attempt(message)) {
                 modifier.sendMessage(input.provider().getActor());
-                event.setCancelled(true);
                 return;
             }
         }

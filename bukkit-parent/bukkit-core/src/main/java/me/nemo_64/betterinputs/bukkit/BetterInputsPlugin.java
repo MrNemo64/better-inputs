@@ -150,15 +150,6 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
         metrics.addCustomChart(new SingleLineChart("input_created", () -> {
             return statCreatedInput.getAndSet(0);
         }));
-        metrics.addCustomChart(new AdvancedPie("default_provider_type", () -> {
-            HashMap<String, Integer> map = new HashMap<>();
-            Map<String, AtomicInteger> providedMap = statProviderType.get(keyProvider.getNamespace());
-            for (String key : providedMap.keySet()) {
-                String name = key.substring(6);
-                map.put(name, providedMap.get(key).get());
-            }
-            return map;
-        }));
         metrics.addCustomChart(new DrilldownPie("plugin_providers", () -> {
             HashMap<String, Map<String, Integer>> allMap = new HashMap<>();
             for (String key : statProviderType.keySet()) {
@@ -201,13 +192,12 @@ public final class BetterInputsPlugin extends JavaPlugin implements IServiceProv
      * Stats
      */
 
-    final void updateStat(String providerType, Class<?> inputType) {
+    final void updateStat(String pluginName, String providerKey, Class<?> inputType) {
         statCreatedInput.addAndGet(1);
-        int index = providerType.indexOf(':');
-        String namespace = providerType.substring(0, index);
-        String key = providerType.substring(index + 1, providerType.length());
-        statProviderType.computeIfAbsent(namespace, (i) -> new ConcurrentHashMap<>()).computeIfAbsent(key, (i) -> new AtomicInteger(0))
-            .addAndGet(1);
+        if (pluginName != null) {
+            statProviderType.computeIfAbsent(pluginName, (i) -> new ConcurrentHashMap<>())
+                .computeIfAbsent(providerKey, (i) -> new AtomicInteger(0)).addAndGet(1);
+        }
         String inputName = inputType.getName();
         if (inputName.startsWith("java.lang.")) {
             inputName = inputType.getSimpleName();

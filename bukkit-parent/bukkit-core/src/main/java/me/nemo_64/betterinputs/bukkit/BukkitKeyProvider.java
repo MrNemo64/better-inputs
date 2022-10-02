@@ -14,6 +14,8 @@ final class BukkitKeyProvider implements IPlatformKeyProvider {
     private static final Pattern VALID_KEY = Pattern.compile("[a-z0-9/._-]+");
 
     private final Plugin plugin;
+    private final String pluginName;
+    
     private final String namespace;
 
     private final ConcurrentHashMap<String, BukkitKey> keys = new ConcurrentHashMap<>();
@@ -25,7 +27,8 @@ final class BukkitKeyProvider implements IPlatformKeyProvider {
     BukkitKeyProvider(final BetterInputsBukkit bukkitApi, final Plugin plugin) {
         this.bukkitApi = bukkitApi;
         this.plugin = plugin;
-        this.namespace = plugin.getName().toLowerCase(Locale.ROOT).replace(' ', '_');
+        this.pluginName = plugin.getName();
+        this.namespace = pluginName.toLowerCase(Locale.ROOT).replace(' ', '_');
     }
 
     public final ClassLoader getClassLoader() {
@@ -34,6 +37,10 @@ final class BukkitKeyProvider implements IPlatformKeyProvider {
 
     public final Plugin getPlugin() {
         return plugin;
+    }
+    
+    public final String getPluginName() {
+        return pluginName;
     }
 
     @Override
