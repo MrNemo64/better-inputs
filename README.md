@@ -1,52 +1,444 @@
-# Better Inputs
-Aiming to make getting input from users easyer, better inputs tryes to provide a collection of clases to get input from users.
-With this API we hope that getting input from an user can be as easy as doing
-```Java
-InputProcessManager manager = ... // Class in charge of managing input processes, queueing them and starting them
-InputProcessSender<?> sender = ... // Represents the user giving the input
-InputProcess<?, Integer> process = InputProcessBuilder.simpleProcess()
-  .withSender(sender)
-  .withModifier(new ChatBloquingModifier()) // Stops the user from receiving any chat messages while the process runs (probably will exist in the spigot api)
-  .withModifier(new TimerModifier(30, TimeUnit.SECONDS)) // The user will only have 30 seconds to provide the input
-  .whenStarts((sender) -> sender.sendMessage("What is 3+17?")) // callback for when the process starts
-  .withListener(new NumberFromChatListener()) // will listen for messages in chat for numbers
-  .createAndQueue(manager);
-process.getValue().whenComplete((value, error) -> {
-  if(error == null) return; // something went wrong with the process
-  if(value == 20) 
-    sender.sendMessage("Correct!");
-});
+[![Contributors][contributors-shield]][contributors-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![GPLv3 License][license-shield]][license-url]
+
+
+
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="https://github.com/MrNemo64/better-inputs">
+    <img src="images/logo.png" alt="Logo" width="96" height="96"/>
+  </a>
+
+  <h3 align="center">BetterInputs</h3>
+
+  <p align="center">
+    <!-- TODO: project_description -->
+    <br />
+    <a href="https://mrnemo64.github.io/better-inputs/docs"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/MrNemo64/better-inputs/issues/new">Report Bug</a>
+    ·
+    <a href="https://github.com/MrNemo64/better-inputs/issues/new">Request Feature</a>
+  </p>
+</p>
+
+
+
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#installation">Installation</a></li>
+        <li>
+          <a href="#setup">Setup</a>
+          <ul>
+            <a href="#maven">Maven</a>
+          </ul>
+        </li>
+        <li><a href="#usage">Usage</a></li>
+      </ul>
+    </li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
+
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+<!-- <img src="images/banner.png" alt="BetterInputs Banner"/> -->
+Aiming to make getting input from users easier, better inputs tries to provide a collection of classes to get input from users. With this API we hope that getting input from an user can be as easy as creating a simple command.
+
+### Built With
+
+* [Spigot](https://hub.spigotmc.org/stash/projects/SPIGOT/repos/spigot/browse)
+* [LayLib](https://github.com/Lauriichan/LayLib)
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+To get a local copy you only need to download it from [Spigot](https://spigotmc.org/)
+or if you want to get the Source just fork this repository or download it as zip.
+
+### Installation
+
+To install the plugin you only need to do following steps:
+1. Download the plugin
+2. Put it into your server's plugin folder
+3. Start or reload your server
+4. Enjoy the plugin!
+
+### Setup
+
+#### Maven
+To get started with maven you first need to setup your environment to get access to the api maven package.
+To do that simply go into your `.m2` folder which can be found at `%appData%\..\..\.m2` (Open `Run` on Windows and just paste the path into there and click `Ok`).
+Afterwards if the file doesn't exist yet create the file `settings.xml` in the folder.
+Then put following stuff into the file:
+```XML
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<activeProfiles>
+		<activeProfile>github</activeProfile>
+	</activeProfiles>
+
+	<profiles>
+		<profile>
+			<id>github</id>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>https://repo1.maven.org/maven2</url>
+				</repository>
+				<repository>
+					<id>github0</id>
+					<url>https://maven.pkg.github.com/MrNemo64/*</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+
+	<servers>
+		<server>
+			<id>github0</id>
+			<username>YOUR_GITHUB_USERNAME</username>
+			<password>A_GITHUB_TOKEN</password>
+		</server>
+	</servers>
+</settings>
 ```
-Looks easy right? We want to launch the API with enough listeners and modifiers so that there is one for every case.
+Now replace `YOUR_GITHUB_USERNAME` with your github username.
+Then go to your Github account settings and scroll down until you see `Developer settings`.
+Go into the `Developer settings` and then click on `Personal access tokens`.
+Once you are there click on the `Generate new token` button.
+I would recommend you to enter `Maven packages` into the `Note` field and set the epiration to `No expiration`.
+Then you need to enable `repo:status` and `read:packages`. 
+Once you enabled those click on `Generate Token` at the bottom.
+Now github should show you the token, simply copy the token and replace `A_GITHUB_TOKEN` with it.
+The token can be used for multiple servers so if you want to have access to another repository hosted on github simply copy the `github0` repository replace `MrNemo64` with the authors' name and copy the `github0` server. Be sure to rename the repository and server id to for example `github1` or something similar (they have to match up).
 
-Right now better inputs is unusable as it's not finished. After a lot of time thinking about how to develop this API we came to this point but now we would like to hear other developers ideas. We have created the base classes and interfaces that could be used as the infraestructure for this and documented them a little, we would apreciate if you would check them and tell us about it, ideally in an issue, discussion or a thread that we may have created in forums to show the API, that way others can also coment the idea.
+Once this is setup you can simply add the dependency like this in your `pom.xml`:
+```xml
+<dependency>
+  <groupId>me.nemo_64.betterinputs</groupId>
+  <artifactId>api</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+You can get the [latest version here](https://github.com/MrNemo64/better-inputs/packages/PACKAGE_ID_HERE)
 
-## Some explanation
-We'll go somewhat in detail here about what each class does. To make clear why some things are the way they are, right now Better Inputs is being thought as a spigot API, but in the future we want to expand it to other platforms like Discord (JDA and Javacord). An example of things done in the way they are is the `InputProcessSender` class
-- **InputProcessSender<R>**: Represents the user sending the input and gives a method to send messages to the user. Is generic as sometimes messages cannot be sent. Ideally the generic type will be a Boolean to tell if the message was sent or not, a CompletableFuture if the message may take time to be sent or simply Void. For example, in Javacord sending a message returns a `CompletableFuture<Message>` but in spigot returns `void`, therefore we consider this generalization to be necessary
-- **InputProcess<S, V>**: Represents an input process itself. `S` is the type of the sender (something that implements `InputProcessSender`) and `V` is the type of the final value
-- **AbstractInputProcess<S, I, V>**: A half finished implementation of `InputProcess` to show how an implementation of it could look like. `S` and `V` are the same as in `InputProcess` and `I` represents the type of the acepted input. In out example above, `I` would be `String` (the sender sends a chat message, a string) and `V` would be `Integer`, the desired value type
-- **InputProcessFailureReason**: Represents reasons as to why an input process could fail
-- **InputProcessPriority**: Allows to give priorityes to input processes so higher priority ones run first
-- **InputProcessState**: Indicates the states in which an input process may be
-- **InputProcessRunnerModifier<I, V>**: `I` and `V` are the same as in `AbstractInputProcess`. As shown in the example this would allow to add extras to the input process. Setting a time limit, giving a maximun amout of attempts, bloquings other messages from reaching the user until the process is finished, etc
-- **InputProcessListener\<I>**: `I` is the same as in `AbstractInputProcess`. This would be in charge of collecting the user inputs. This would be, for example, listening for chat messages, actions (clicks for example), etc
-- **InputProcessRunner\<P>**: `P` is the type of input process the runner is in charge of running. Initially a process would run itself but this had an issue: processes are queued and stared when they can be started so we need to somehow notify the process and its components (listener and modifiers). At first we thought about providing a callback to the manager for when the process starts or having a `onInputProcessStarted` method on `InputProcess` so when the process starts the manager can call it, but having a separated runner seemed better. The runner would be responsible for notifing the process and its components when the process is started by the manager and notify the components when the process finishes and canceling the process
-- **InputProcessManager**: Responsable for handling queues of processes. This is done because two processes can't be simultaneously running for only one user, therefore we need to have a manager starting them when no other process is running
-- **DefaultInputProcessManager**: An implementation of InputProcessManager showing how the manager could be implented
+### Usage
 
-## Plans for the future
-1. We have the idea of providing several types of processes: simple (shown in the example, just to get an input), multy (to get a secuence of inputs, we have thought about implementing it as an implementation of process that has a list of processes itself), complex (like multy but the next process in the secuence is not in a list, is dinamically generated, somehow)
-2. Expanding into other platforms like discord but maybe even more
+#### Using the api to get input
+```Java
+package me.nemo_64.betterinputs.example;
 
-## Things we would like ideas on
-1. *InputProcessRunnerModifier*: Should they be part of the runner or the process?
-2. *InputProcessRunnerModifier modifing inputs and values*: Maybe a modifier needs to, for some reason, modify the given input/value before it's used so, should we allow modifiers to modify the input/value? In our current implemenmtation we even allow them to discard them (returning an empty optional on `onInputReceived` and `onValueConverted`). This gives us a problem explained in a coment
-  > Should a modifier be able to edit the input and value? Or just be notified of it? For now we'll allow to modify the input and value but what does this really mean? If two modifiers edit the input/value which one do we use? Or do we have a priority system and the returned value is the one given to the next modifier? Do we allow a modifier to even discard an input/value? Like, if it returns an empty optional the input/value is discarded. Could allow some filtering based modifiers...
+import me.nemo_64.betterinputs.api.*;
+import me.nemo_64.betterinputs.api.input.*;
+import me.nemo_64.betterinputs.api.input.modifier.*;
+import me.nemo_64.betterinputs.api.platform.*;
+import me.nemo_64.betterinputs.api.util.*;
+import me.nemo_64.betterinputs.api.util.argument.*;
+import me.nemo_64.betterinputs.api.util.registry.*;
+import me.nemo_64.betterinputs.api.util.tick.*;
 
-  [InputProcessRunnerModifier#L35](https://github.com/MrNemo64/better-inputs/blob/933bed955acba153ff59132a0c13627d30c40dd6/api/src/main/java/me/nemo_64/better_inputs/InputProcessRunnerModifier.java#L35)
+public final class ExampleClass {
 
-3. *InputProcessProcessor*: In early stages of the idea we had another class: `InputProcessProcessor`. This class was in charge of three things: Checking if the input is the cancel input (what the user sends to cancel the process), checking if the input is valid (in the example above, we turn strings into integers, what if the user sends 'hello' instead of a number? This class was responsible for checking that), and finally turning the input into the value (converting the string into the integer). This acted like a bridge between listeners and processes so it didn't matter if the listener provides strings and the process requires integers, booleans or whatever, you just needed a processor to handle the conversion
-4. *Should `InputProcessFailureReason` implement `Throwable`*? So i t can be the error given to the completable future of the process
+  public static void expandedExample(BetterInputs api, Object actor) {
+    // Create a input builder
+    InputBuilder<String> builder = api.createInput(String.class);
+    // Specify the input provider type that you want to use
+    // Depedening on what is available you might get a exception later
+    // Default types are:
+    // - betterinputs:input/chat
+    // - betterinputs:input/anvil
+    // - betterinputs:input/command_block
+    // Please note that the anvil and command_block input only work on
+    // 1.16+ as they require some packet trickery, chat however is guaranteed
+    // if BetterInputs is installed on your server
+    //
+    // We will use the anvil input type as it helps to show everything better
+    builder.type("betterinputs:input/anvil");
+    // Now simply add the actor
+    // Please note that you can't just put anything in here
+    // If the actor is not available on the platform then it just won't work
+    // On bukkit everything that is a CommandSender will work though
+    builder.actor(actor);
+    // Now you can add parameters
+    // All default input types do not need any parameters but you can still provide some
+    // Check out the default input types at https://github.com/MrNemo64/better-inputs/tree/master/bukkit-parent/bukkit-core/src/main/java/me/nemo_64/betterinputs/bukkit/input
+    builder.param("name", "Our Anvil Input");
+    builder.param("item", "Placeholder Text");
+    // Now you can add a cancel listener
+    // This step is not required and can theoretically be ignored
+    builder.cancelListener((provider, reason) -> {
+      provider.getActor().sendMessage("Cancelled because '" + reason + "'!");
+    });
+    // Lastly we can provide a exception handler
+    // I would recommend adding the exception handler but it's not required
+    builder.execeptionHandler((throwable) -> {
+      // TODO: Handle exception here
+    });
+    // Now that our builder is fully configured we can get our InputProvider
+    // Calling InputBuilder.provider() might cause some exceptions to arise if you made a mistake
+    // This includes:
+    // - Providing an invalid actor or no actor at all
+    // - Trying to get a not valid input provider type
+    InputProvider<String> provider = builder.provide();
+    // Now that the process is created we can do a couple other things before starting it
+    // Like adding modifiers
+    // The timeout modifier will just cancel the process once the time is up
+    // It works with ticks and therefore uses a class called TickUnit which can convert all
+    // provided time units to ticks
+    provider.withModifier(new TimeoutModifier(30, TickUnit.SECOND));
+    // There is also the attempt modifier which has to be implemented by the input provider
+    // The attempt modifier is there to validate the if a input attempt is acceptable
+    // If the X attempts (in this case 5) were not acceptable it will cancel the input process
+    // The last argument of this modifier is optional and can be removed
+    // Its only purpose is to customize the message sent to the owning actor
+    // There is a default function for it but null is not accepted
+    provider.withModifier(new AttemptModifier(5, (string) -> string.endsWith("!"), (actor) -> actor.sendMessage("Please enter a valid string!")));
+    // Lastly we can provide a modifier exception handler
+    // Basically a handler for any exception which is thrown by any of our modifiers
+    provider.withModifierExceptionHandler((modifier, exception) -> {
+      // TODO: Handle modifier exception here
+    });
+    // Okay now lets start the input process
+    // The first call to this function starts it
+    // Every other call will just get the future
+    StagedFuture<String> future = provider.asFuture();
+    // To get the value now simply accept it like this:
+    future.thenAccept(string -> {
+      // TODO: Do stuff with the value
+    });
+    // You can theoretically also transform it or work with other different things here at the end
+    // We basically used the CompletableFuture class by Java but with small improvements
+  }
 
-For now thats all we have to say, thank you for your time!
+  public static void compactExample(BetterInputs api, Object actor) {
+    // Now lets do this in the more intended way of this api
+    // The compact "easy" way
+    api.createInput(String.class)
+      .actor(actor)
+      .type("betterinputs:input/anvil")
+      .param("name", "Our Anvil Input")
+      .param("item", "Placeholder Text")
+      .cancelListener((provider, reason) -> {
+        provider.getActor().sendMessage("Cancelled because '" + reason + "'!");
+      }).exceptionHandler((throwable) -> {
+        // TODO: Handle exception here
+      }).provide()
+        .withModifier(new TimeoutModifier(30, TickUnit.SECOND))
+        // I won't be using a custom message supplier here
+        .withModifier(new AttemptModifier(5, (string) -> string.endsWith("!")))
+        .withModifierExceptionHandler((modifier, exception) -> {
+          // TODO: Handle modifier exception here
+        })
+        .asFuture().thenAccept((string) -> {
+          // TODO: Do stuff with the value
+        });
+  }
+
+}
+```
+
+#### Using the api to provide input
+
+The basics to providing input is done with two classes:
+1. The input class itself
+
+```java
+package me.nemo_64.betterinputs.example;
+
+import me.nemo_64.betterinputs.api.*;
+import me.nemo_64.betterinputs.api.input.*;
+import me.nemo_64.betterinputs.api.input.modifier.*;
+import me.nemo_64.betterinputs.api.platform.*;
+import me.nemo_64.betterinputs.api.util.*;
+import me.nemo_64.betterinputs.api.util.argument.*;
+import me.nemo_64.betterinputs.api.util.registry.*;
+import me.nemo_64.betterinputs.api.util.tick.*;
+
+public final class ExampleInput extends AbstractInput<String> {
+
+  @Override
+  protected void onStart(InputProvider<String> provider, IPlatformActor<?> actor){
+    // Here the input process is started
+    // We recommend doing your start logic here and not in the constructor
+    // As everything before here is not guaranteed to be started
+
+    // To complete the input you have to call:
+    // completeValue(V); where the value is the type of your input or null (in this case a String)
+    // or
+    // completeException(Throwable); where the value is an exception
+    
+    // If you need to access the input provider somewhere that is not in this method
+    // then you can just use AbstractInput.provider(); the method is publicly available
+    // and works if you well got an input instance so just pass the input instance around I guess
+  }
+
+  // This doesn't need to be here
+  // But it would be best to add an implementation of it
+  // So people can cancel their input process if they just don't need it anymore
+  @Override
+  protected boolean onCancel() {
+    return false; // Default is just disallowing the cancel
+  }
+
+}
+```
+
+2. The factory class which creates the input class based on the provided arguments
+
+
+```java
+package me.nemo_64.betterinputs.example;
+
+import me.nemo_64.betterinputs.api.*;
+import me.nemo_64.betterinputs.api.input.*;
+import me.nemo_64.betterinputs.api.input.modifier.*;
+import me.nemo_64.betterinputs.api.platform.*;
+import me.nemo_64.betterinputs.api.util.*;
+import me.nemo_64.betterinputs.api.util.argument.*;
+import me.nemo_64.betterinputs.api.util.registry.*;
+import me.nemo_64.betterinputs.api.util.tick.*;
+
+public final class ExampleInputFactory extends InputFactory<String, ExampleInput> {
+
+  public ExampleInputFactory(IPlatformKey key) {
+    super(key, String.class);
+    // Here in your constructor you should ready everything up that is required to work with your input.
+    // Stuff like registering listeners or similar things should be done here
+  }
+
+  // This method notifies the factory that it was unregistered
+  // A implementation is not required but if you work with for example listeners
+  // or other stuff that would be unregistered then this is the place to do it
+  @Override
+  public void onUnregister(){
+
+  }
+
+  // Here your input is created
+  // You are provided all arguments that the other plugin using your input provided you with
+  // As well as the actor that is owning the input process
+  @Override
+  protected ExampleInput provide(IPlatformActor<?> actor, ArgumentMap map){
+    return new ExampleInput();
+  }
+
+}
+```
+
+To register everything you need a platform identifiable object.
+For bukkit a platform identifiable object is a plugin.
+So here a sample plugin class that provides input:
+
+```java 
+package me.nemo_64.betterinputs.example;
+
+import me.nemo_64.betterinputs.api.*;
+import me.nemo_64.betterinputs.api.input.*;
+import me.nemo_64.betterinputs.api.input.modifier.*;
+import me.nemo_64.betterinputs.api.platform.*;
+import me.nemo_64.betterinputs.api.util.*;
+import me.nemo_64.betterinputs.api.util.argument.*;
+import me.nemo_64.betterinputs.api.util.registry.*;
+import me.nemo_64.betterinputs.api.util.tick.*;
+
+public final class ExamplePlugin extends JavaPlugin {
+
+  @Override
+  public void onEnable() {
+    // We recommend using this approach for getting the api
+    BetterInputs<?> api = Bukkit.getServicesManager().getRegistration(BetterInputs.class).getProvider();
+    // Theoretically you could also use:
+    // BetterInputs<?> api = BetterInputs.getPlatform();
+    IPlatformKeyProvider keyProvider = api.tryGetKeyProvider(this).get();
+    // The key can be anything, really
+    api.registerInputFactory(new ExampleInputFactory(keyProvider.getKey("input/example")));
+  }
+
+}
+```
+
+And about the plugin.yml
+```yml
+main: me.nemo_64.betterinputs.example.ExamplePlugin
+name: BetterInputsExample
+authors: [MrNemo64, Lauriichan]
+version: 0.1.0
+api-version: 1.13
+depend: [BetterInputs]
+```
+
+<!-- ROADMAP -->
+## Roadmap
+
+See the [open issues](https://github.com/MrNemo64/better-inputs/issues) for a list of proposed features (and known issues).
+
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+
+
+<!-- CONTACT -->
+## Contact
+
+Project Link: [https://github.com/MrNemo64/better-inputs](https://github.com/MrNemo64/better-inputs)
+
+
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/MrNemo64/better-inputs.svg?style=flat-square
+[contributors-url]: https://github.com/MrNemo64/better-inputs/graphs/contributors
+[stars-shield]: https://img.shields.io/github/stars/MrNemo64/better-inputs.svg?style=flat-square
+[stars-url]: https://github.com/MrNemo64/better-inputs/stargazers
+[issues-shield]: https://img.shields.io/github/issues/MrNemo64/better-inputs.svg?style=flat-square
+[issues-url]: https://github.com/MrNemo64/better-inputs/issues
+[license-shield]: https://img.shields.io/github/license/MrNemo64/better-inputs.svg?style=flat-square
+[license-url]: https://github.com/MrNemo64/better-inputs/blob/master/LICENSE

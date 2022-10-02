@@ -214,7 +214,7 @@ public final class InputProvider<V> {
     }
 
     final void runTick() {
-        if (modifiers.isEmpty()) {
+        if (modifiers.isEmpty() || input.provider() == null) {
             return;
         }
         AbstractModifier[] modifiers = this.modifiers.values().toArray(AbstractModifier[]::new);
