@@ -25,8 +25,9 @@ public final class Option<T> {
      * {@code Option}.
      *
      *
-     * @param <T> The type of the non-existent value
-     * @return an empty {@code Option}
+     * @param  <T> The type of the non-existent value
+     * 
+     * @return     an empty {@code Option}
      */
     @SuppressWarnings("unchecked")
     public static <T> Option<T> empty() {
@@ -44,8 +45,8 @@ public final class Option<T> {
      * Constructs an instance with the described value.
      *
      * @param value the value to describe; it's the caller's responsibility to
-     *              ensure the value is non-{@code null} unless creating the
-     *              singleton instance returned by {@code empty()}.
+     *                  ensure the value is non-{@code null} unless creating the
+     *                  singleton instance returned by {@code empty()}.
      */
     private Option(T value) {
         this.value = value;
@@ -54,9 +55,10 @@ public final class Option<T> {
     /**
      * Returns an {@code Option} describing the given value.
      *
-     * @param value the value to describe
-     * @param <T>   the type of the value
-     * @return an {@code Option} with the value
+     * @param  value the value to describe
+     * @param  <T>   the type of the value
+     * 
+     * @return       an {@code Option} with the value
      */
     public static <T> Option<T> of(T value) {
         if (value == null) {
@@ -73,7 +75,7 @@ public final class Option<T> {
     public Optional<T> asOptional() {
         return Optional.ofNullable(value);
     }
-    
+
     /**
      * returns the value as an reference
      * 
@@ -114,9 +116,11 @@ public final class Option<T> {
      * If a value is present, performs the given action with the value, otherwise
      * does nothing.
      *
-     * @param action the action to be performed, if a value is present
+     * @param  action               the action to be performed, if a value is
+     *                                  present
+     * 
      * @throws NullPointerException if value is present and the given action is
-     *                              {@code null}
+     *                                  {@code null}
      */
     public void ifPresent(Consumer<? super T> action) {
         if (isEmpty()) {
@@ -129,12 +133,14 @@ public final class Option<T> {
      * If a value is present, performs the given action with the value, otherwise
      * performs the given empty-based action.
      *
-     * @param action      the action to be performed, if a value is present
-     * @param emptyAction the empty-based action to be performed, if no value is
-     *                    present
+     * @param  action               the action to be performed, if a value is
+     *                                  present
+     * @param  emptyAction          the empty-based action to be performed, if no
+     *                                  value is present
+     * 
      * @throws NullPointerException if a value is present and the given action is
-     *                              {@code null}, or no value is present and the
-     *                              given empty-based action is {@code null}.
+     *                                  {@code null}, or no value is present and the
+     *                                  given empty-based action is {@code null}.
      */
     public void ifPresentOrElse(Consumer<? super T> action, Runnable emptyAction) {
         if (isEmpty()) {
@@ -148,15 +154,16 @@ public final class Option<T> {
      * If a value is absent, performs the given action with the value, otherwise
      * does nothing.
      *
-     * @param action the action to be performed, if a value is absent
+     * @param  action               the action to be performed, if a value is absent
+     * 
      * @throws NullPointerException if value is absent and the given action is
-     *                              {@code null}
+     *                                  {@code null}
      */
-    public void ifAbsent(Runnable runnable) {
+    public void ifAbsent(Runnable action) {
         if (isPresent()) {
             return;
         }
-        runnable.run();
+        action.run();
     }
 
     /**
@@ -164,10 +171,13 @@ public final class Option<T> {
      * {@code Option} describing the value, otherwise returns an empty
      * {@code Option}.
      *
-     * @param predicate the predicate to apply to a value, if present
-     * @return an {@code Option} describing the value of this {@code Option}, if a
-     *         value is present and the value matches the given predicate, otherwise
-     *         an empty {@code Option}
+     * @param  predicate            the predicate to apply to a value, if present
+     * 
+     * @return                      an {@code Option} describing the value of this
+     *                                  {@code Option}, if a value is present and
+     *                                  the value matches the given predicate,
+     *                                  otherwise an empty {@code Option}
+     * 
      * @throws NullPointerException if the predicate is {@code null}
      */
     public Option<T> filter(Predicate<? super T> predicate) {
@@ -184,11 +194,16 @@ public final class Option<T> {
      * If the mapping function returns a {@code null} result then this method
      * returns an empty {@code Option}.
      *
-     * @param mapper the mapping function to apply to a value, if present
-     * @param <U>    The type of the value returned from the mapping function
-     * @return an {@code Option} describing the result of applying a mapping
-     *         function to the value of this {@code Option}, if a value is present,
-     *         otherwise an empty {@code Option}
+     * @param  mapper               the mapping function to apply to a value, if
+     *                                  present
+     * @param  <U>                  The type of the value returned from the mapping
+     *                                  function
+     * 
+     * @return                      an {@code Option} describing the result of
+     *                                  applying a mapping function to the value of
+     *                                  this {@code Option}, if a value is present,
+     *                                  otherwise an empty {@code Option}
+     * 
      * @throws NullPointerException if the mapping function is {@code null}
      */
     public <U> Option<U> map(Function<? super T, ? extends U> mapper) {
@@ -206,14 +221,18 @@ public final class Option<T> {
      * one whose result is already an {@code Option}, and if invoked,
      * {@code flatMap} does not wrap it within an additional {@code Option}.
      *
-     * @param <U>    The type of value of the {@code Option} returned by the mapping
-     *               function
-     * @param mapper the mapping function to apply to a value, if present
-     * @return the result of applying an {@code Option}-bearing mapping function to
-     *         the value of this {@code Option}, if a value is present, otherwise an
-     *         empty {@code Option}
+     * @param  <U>                  The type of value of the {@code Option} returned
+     *                                  by the mapping function
+     * @param  mapper               the mapping function to apply to a value, if
+     *                                  present
+     * 
+     * @return                      the result of applying an {@code Option}-bearing
+     *                                  mapping function to the value of this
+     *                                  {@code Option}, if a value is present,
+     *                                  otherwise an empty {@code Option}
+     * 
      * @throws NullPointerException if the mapping function is {@code null} or
-     *                              returns a {@code null} result
+     *                                  returns a {@code null} result
      */
     @SuppressWarnings("unchecked")
     public <U> Option<U> flatMap(Function<? super T, ? extends Option<? extends U>> mapper) {
@@ -225,13 +244,16 @@ public final class Option<T> {
      * If a value is present, returns an {@code Option} describing the value,
      * otherwise returns an {@code Option} produced by the supplying function.
      *
-     * @param supplier the supplying function that produces an {@code Option} to be
-     *                 returned
-     * @return returns an {@code Option} describing the value of this
-     *         {@code Option}, if a value is present, otherwise an {@code Option}
-     *         produced by the supplying function.
+     * @param  supplier             the supplying function that produces an
+     *                                  {@code Option} to be returned
+     * 
+     * @return                      returns an {@code Option} describing the value
+     *                                  of this {@code Option}, if a value is
+     *                                  present, otherwise an {@code Option}
+     *                                  produced by the supplying function.
+     * 
      * @throws NullPointerException if the supplying function is {@code null} or
-     *                              produces a {@code null} result
+     *                                  produces a {@code null} result
      */
     @SuppressWarnings("unchecked")
     public Option<T> or(Supplier<? extends Option<? extends T>> supplier) {
@@ -252,9 +274,10 @@ public final class Option<T> {
     /**
      * If a value is present, returns the value, otherwise returns {@code other}.
      *
-     * @param other the value to be returned, if no value is present. May be
-     *              {@code null}.
-     * @return the value, if present, otherwise {@code other}
+     * @param  other the value to be returned, if no value is present. May be
+     *                   {@code null}.
+     * 
+     * @return       the value, if present, otherwise {@code other}
      */
     public T orElse(T other) {
         return value != null ? value : other;
@@ -264,11 +287,14 @@ public final class Option<T> {
      * If a value is present, returns the value, otherwise returns the result
      * produced by the supplying function.
      *
-     * @param supplier the supplying function that produces a value to be returned
-     * @return the value, if present, otherwise the result produced by the supplying
-     *         function
+     * @param  supplier             the supplying function that produces a value to
+     *                                  be returned
+     * 
+     * @return                      the value, if present, otherwise the result
+     *                                  produced by the supplying function
+     * 
      * @throws NullPointerException if no value is present and the supplying
-     *                              function is {@code null}
+     *                                  function is {@code null}
      */
     public T orElseGet(Supplier<? extends T> supplier) {
         return isPresent() ? value : supplier.get();
@@ -277,9 +303,13 @@ public final class Option<T> {
     /**
      * If a value is present, returns the value, otherwise runs runnable
      *
-     * @return the value described by this {@code Option}
+     * @param  runnable             the runnable to be execute if no value is
+     *                                  present
+     *
+     * @return                      the value described by this {@code Option}
+     * 
      * @throws NullPointerException if no value is present and the runnable is
-     *                              {@code null}
+     *                                  {@code null}
      */
     public T orElseRun(Runnable runnable) {
         if (isPresent()) {
@@ -293,7 +323,9 @@ public final class Option<T> {
      * If a value is present, returns the value, otherwise throws
      * {@code NoSuchElementException}.
      *
-     * @return the non-{@code null} value described by this {@code Option}
+     * @return                        the non-{@code null} value described by this
+     *                                    {@code Option}
+     * 
      * @throws NoSuchElementException if no value is present
      */
     public T orElseThrow() {
@@ -307,13 +339,15 @@ public final class Option<T> {
      * If a value is present, returns the value, otherwise throws an exception
      * produced by the exception supplying function.
      *
-     * @param <X>               Type of the exception to be thrown
-     * @param exceptionSupplier the supplying function that produces an exception to
-     *                          be thrown
-     * @return the value, if present
+     * @param  <X>                  Type of the exception to be thrown
+     * @param  exceptionSupplier    the supplying function that produces an
+     *                                  exception to be thrown
+     * 
+     * @return                      the value, if present
+     * 
      * @throws X                    if no value is present
      * @throws NullPointerException if no value is present and the exception
-     *                              supplying function is {@code null}
+     *                                  supplying function is {@code null}
      */
     public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (isPresent()) {
@@ -331,9 +365,10 @@ public final class Option<T> {
      * <li>the present values are "equal to" each other via {@code equals()}.
      * </ul>
      *
-     * @param obj an object to be tested for equality
-     * @return {@code true} if the other object is "equal to" this object otherwise
-     *         {@code false}
+     * @param  obj an object to be tested for equality
+     * 
+     * @return     {@code true} if the other object is "equal to" this object
+     *                 otherwise {@code false}
      */
     @Override
     public boolean equals(Object obj) {
@@ -354,7 +389,7 @@ public final class Option<T> {
      * no value is present.
      *
      * @return hash code value of the present value or {@code 0} if no value is
-     *         present
+     *             present
      */
     @Override
     public int hashCode() {

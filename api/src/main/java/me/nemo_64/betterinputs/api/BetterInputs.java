@@ -174,6 +174,7 @@ public abstract class BetterInputs<P> {
     /**
      * Creates a new input provider based on the {@code builder}
      * 
+     * @param  <T>                         the provided input type
      * @param  builder                     the input builder that describes the
      *                                         input process
      * 

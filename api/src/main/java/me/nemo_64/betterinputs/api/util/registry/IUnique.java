@@ -6,6 +6,8 @@ public interface IUnique {
 
     /**
      * Gets the key of this unique object
+     * 
+     * @return the key of this object
      */
     IPlatformKey getKey();
 

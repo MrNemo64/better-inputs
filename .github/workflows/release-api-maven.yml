@@ -6,7 +6,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,7 +22,18 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - name: Build and publish to GitHub Packages
-      run: mvn deploy -DpomFile=api/pom.xml -s ${{ github.workspace }}/.m2/settings.xml
+      run: |
+        cd api
+        mvn deploy -s ${{ github.workspace }}/.m2/settings.xml
+        mvn javadoc:javadoc
+        cd ..
       env:
         GITHUB_TOKEN: ${{ github.token }}
         GITHUB_USER: ${{ github.repository_owner }}
+    - name: Deploy JavaDoc
+      uses: MathieuSoysal/Javadoc-publisher.yml@v2.0.4
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        javadoc-branch: docs
+        java-version: 16
+        target-folder: ${{ github.workspace }}/api/target/site/apidocs 
