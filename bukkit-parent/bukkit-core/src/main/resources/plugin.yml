@@ -1,0 +1,5 @@
+main: me.nemo_64.betterinputs.bukkit.BetterInputsPlugin
+name: BetterInputs
+authors: [MrNemo64, Lauriichan]
+version: ${project.version}
+api-version: 1.16

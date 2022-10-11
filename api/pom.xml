@@ -1,20 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>better-inputs</artifactId>
-        <groupId>me.nemo_64</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>me.nemo_64.better-inputs</groupId>
+    <parent>
+        <groupId>me.nemo_64.betterinputs</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.1.0</version>
+    </parent>
     <artifactId>api</artifactId>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub MrNemo64 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/MrNemo64/better-inputs</url>
+        </repository>
+    </distributionManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>reflection</artifactId>
+            <version>0.1.0-10191ac-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <show>public</show>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
