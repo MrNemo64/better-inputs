@@ -43,6 +43,10 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4.4.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}}}
+        git-config-name: ${{ github.repository_owner }}
+        git-config-email: ${{ github.repository_owner }}@users.noreply.github.com
+        force: false
+        clean: true
         branch: docs
-        folder: api/target/site/apidocs
         target-folder: .
+        folder: api/target/site/apidocs
