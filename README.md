@@ -19,7 +19,7 @@
   <p align="center">
     <!-- TODO: project_description -->
     <br />
-    <a href="https://mrnemo64.github.io/better-inputs/docs"><strong>Explore the docs »</strong></a>
+    <a href="https://mrnemo64.github.io/better-inputs/"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/MrNemo64/better-inputs/issues/new">Report Bug</a>
