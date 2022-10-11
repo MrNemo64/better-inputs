@@ -44,6 +44,5 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}}}
         branch: docs
-        clean: true
         folder: api/target/site/apidocs
         target-folder: .
