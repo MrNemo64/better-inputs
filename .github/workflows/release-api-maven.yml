@@ -28,7 +28,7 @@ jobs:
         mvn javadoc:javadoc
         cd ..
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_USER: ${{ github.repository_owner }}
     - name: Deploy JavaDoc
       uses: MathieuSoysal/Javadoc-publisher.yml@v2.0.4
