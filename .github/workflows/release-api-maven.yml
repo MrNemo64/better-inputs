@@ -7,6 +7,12 @@ on:
     
 permissions:
   contents: write
+  packages: write
+  pull-requests: write
+  repository-projects: write
+  deployments: write
+  actions: read
+  checks: read
 
 jobs:
   publish:
