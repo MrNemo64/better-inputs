@@ -40,8 +40,10 @@ jobs:
     - name: Deploy JavaDoc
       uses: JamesIves/github-pages-deploy-action@v4.4.0
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}}}
+        token: ${{ secrets.SPECIAL_TOKEN }}}}
         branch: docs
         clean: true
         folder: api/target/site/apidocs
         target-folder: .
+        name: ${{ github.repository_owner }}
+        email: ${{ github.repository_owner }}@users.noreply.github.com
