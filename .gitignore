@@ -2,6 +2,9 @@
 .settings/
 target/
 
+docs/
+docs/*
+
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
