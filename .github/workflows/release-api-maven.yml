@@ -25,15 +25,23 @@ jobs:
       run: |
         cd api
         mvn deploy -s ${{ github.workspace }}/.m2/settings.xml
-        mvn javadoc:javadoc
         cd ..
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_USER: ${{ github.repository_owner }}
+    - name: Generate JavaDoc
+      run: |
+        cd api
+        mvn javadoc:javadoc
+        cd ..
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}}}
+        GITHUB_USER: ${{ github.repository_owner }}
     - name: Deploy JavaDoc
-      uses: MathieuSoysal/Javadoc-publisher.yml@v2.0.4
+      uses: JamesIves/github-pages-deploy-action@v4.4.0
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        javadoc-branch: docs
-        java-version: 16
-        target-folder: ${{ github.workspace }}/api/target/site/apidocs 
+        token: ${{ secrets.GITHUB_TOKEN }}}}
+        branch: docs
+        clean: true
+        folder: api/target/site/apidocs
+        target-folder: .
