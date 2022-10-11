@@ -5,14 +5,7 @@ on:
     types: [ published ]
     branches: [ master ]
     
-permissions:
-  contents: write
-  packages: write
-  pull-requests: write
-  repository-projects: write
-  deployments: write
-  actions: read
-  checks: read
+permissions: write-all
 
 jobs:
   publish:
