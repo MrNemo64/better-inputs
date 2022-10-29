@@ -5,7 +5,7 @@
     <groupId>me.nemo_64.betterinputs</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <modules>
         <module>api</module>
         <module>bukkit-parent</module>

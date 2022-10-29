@@ -1,7 +1,5 @@
 @echo off
 
-cd %~dp0
-
 color 4
 
 call :check_requirement mvn Maven https://maven.apache.org/download.cgi
@@ -12,11 +10,15 @@ if "%missing_requirement%" == "true" (
 )
 
 set "missing_file=false"
+set "go_back=false"
 call :check_file pom.xml 1
 if "%missing_file%" == "true" (
   echo.
   PAUSE
   exit 2
+)
+if "%go_back%" == "true" (
+  cd ..
 )
 
 color b
@@ -30,9 +32,10 @@ for %%x in (%*) do (
   if "%%x" == "--major" set /a script_type=2
 )
 
+
 echo Reading project version...
 set mvn_version=Not available
-cmd /c "mvn help:evaluate -f %~dp0pom.xml -Dexpression=project.version -q -DforceStdout" > tmp_output
+cmd /c "mvn help:evaluate -f %cd%\pom.xml -Dexpression=project.version -q -DforceStdout" > tmp_output
 color b
 set /p mvn_version= < tmp_output
 del /f tmp_output
@@ -51,7 +54,13 @@ FOR /f "tokens=1* delims=." %%i IN ("%string%") DO (
   if %v_length% == 3 (
     cls
     color 4
-    echo Unsupported version size: %v_length% 
+    echo.
+    echo Unsupported version!
+    echo.
+echo %~dp0
+    echo Version: %mvn_version%
+    echo Size: %v_length% of 3
+    echo.
     PAUSE
     exit 4
   )
@@ -69,8 +78,11 @@ FOR /f "tokens=1* delims=." %%i IN ("%string%") DO (
 if not %v_length% == 3 (
   cls
   color 4
+  echo.
   echo Unsupported version!
   echo.
+echo %~dp0
+  echo Version: %mvn_version%
   echo Size: %v_length% of 3
   echo.
   PAUSE
@@ -109,7 +121,7 @@ set set_version=%v_major%.%v_minor%.%v_fix%
 echo.
 echo New version: %set_version%
 echo.
-cmd /c "mvn versions:set -f %~dp0pom.xml -DnewVersion=%set_version%"
+cmd /c "mvn versions:set -f %cd%\pom.xml -DnewVersion=%set_version%"
 cmd /c "mvn versions:update-child-modules"
 del pom.xml.versionsBackup
 echo.
@@ -137,13 +149,13 @@ exit /b
 if "%missing_file%" == "true" (
   exit /b
 )
-if not %1 == NUL if exist %~dp0%1 (
+if not %1 == NUL if exist %cd%\%1 (
   exit /b
 )
-if not %1 == NUL if not %2 == NUL if %2 == 1 if exist %~dp0..\%1 (
-  cd ..
+if not %1 == NUL if not %2 == NUL if %2 == 1 if exist %cd%\..\%1 (
+  set "go_back=true"
   exit /b
 )
 set "missing_file=true"
-echo Couldn't fine file %1
+echo Couldn't find file %1
 exit /b
