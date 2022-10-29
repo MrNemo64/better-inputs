@@ -139,15 +139,15 @@ Then put following stuff into the file:
 	</servers>
 </settings>
 ```
-Now replace `YOUR_GITHUB_USERNAME` with your github username.
-Then go to your Github account settings and scroll down until you see `Developer settings`.
-Go into the `Developer settings` and then click on `Personal access tokens`.
-Once you are there click on the `Generate new token` button.
-I would recommend you to enter `Maven packages` into the `Note` field and set the epiration to `No expiration`.
-Then you need to enable `repo:status` and `read:packages`. 
-Once you enabled those click on `Generate Token` at the bottom.
-Now github should show you the token, simply copy the token and replace `A_GITHUB_TOKEN` with it.
-The token can be used for multiple servers so if you want to have access to another repository hosted on github simply copy the `github0` repository replace `MrNemo64` with the authors' name and copy the `github0` server. Be sure to rename the repository and server id to for example `github1` or something similar (they have to match up).
+Now replace `YOUR_GITHUB_USERNAME` with your github username.<br>
+Then go to your Github account settings and scroll down until you see `Developer settings`.<br>
+Go into the `Developer settings` and then click on `Personal access tokens`.<br>
+Once you are there click on the `Generate new token` button.<br>
+I would recommend you to enter `Maven packages` into the `Note` field and set the epiration to `No expiration`.<br>
+Then you need to enable `repo:status` and `read:packages`. <br>
+Once you enabled those click on `Generate Token` at the bottom.<br>
+Now github should show you the token, simply copy the token and replace `A_GITHUB_TOKEN` with it.<br>
+The token can be used for multiple servers so if you want to have access to another repository hosted on github simply copy the `github0` repository replace `MrNemo64` with the authors' name and copy the `github0` server. Be sure to rename the repository and server id to for example `github1` or something similar (they have to match up).<br>
 
 Once this is setup you can simply add the dependency like this in your `pom.xml`:
 ```xml
