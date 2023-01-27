@@ -5,10 +5,10 @@
         <artifactId>bukkit-parent</artifactId>
         <version>0.1.1</version>
     </parent>
-    <artifactId>bukkit-1_17_R1</artifactId>
+    <artifactId>bukkit-1_19_R2</artifactId>
 
     <properties>
-        <minecraft.version>1.17.1</minecraft.version>
+        <minecraft.version>1.19.3</minecraft.version>
     </properties>
 
     <dependencies>
