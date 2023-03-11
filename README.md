@@ -155,7 +155,7 @@ Once this is setup you can simply add the dependency like this in your `pom.xml`
   <version>0.1.0</version>
 </dependency>
 ```
-You can get the [latest version here](https://github.com/MrNemo64/better-inputs/packages/PACKAGE_ID_HERE)
+You can get the [latest version here](https://github.com/MrNemo64/better-inputs/packages/1667483)
 
 ### Usage
 
