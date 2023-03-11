@@ -81,7 +81,7 @@ Aiming to make getting input from users easier, better inputs tries to provide a
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy you only need to download it from [Spigot](https://spigotmc.org/)
+To get a local copy you only need to download it from [Spigot](https://www.spigotmc.org/resources/betterinputs.106010/)
 or if you want to get the Source just fork this repository or download it as zip.
 
 ### Installation
