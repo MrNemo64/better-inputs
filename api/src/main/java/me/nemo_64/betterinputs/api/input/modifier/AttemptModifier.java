@@ -52,8 +52,11 @@ public final class AttemptModifier<T> extends AbstractModifier<T> {
         if (isExpired()) {
             return false;
         }
-        if (attempts-- > 0 && validator.test(input)) {
-            return true;
+        if (attempts-- > 0) {
+            if (validator.test(input)) {
+                return true;
+            }
+            return false;
         }
         expire();
         return false;
