@@ -1,0 +1,18 @@
+# This file contains all major versions required by BetterInputs
+# as of the 26th of February 2024.
+#
+# This file can directly be used with BetterBuildTools by Lauriichan
+# https://github.com/Lauriichan/BetterBuildTools/releases/latest
+
+1.16.1
+1.16.3
+1.16.4
+1.17.1
+1.18.1
+1.18.2
+1.19
+1.19.3
+1.19.4
+1.20.1
+1.20.2
+1.20.4
