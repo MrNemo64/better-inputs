@@ -54,8 +54,8 @@ public final class PlayerAdapter1_19_R2 extends PlayerAdapter {
             return CompletableFuture.supplyAsync(() -> createAnvilMenu(name, itemStack), network.packetManager().mainService()).join();
         }
         AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory(), MinecraftConstant1_19_R2.BETTER_NULL);
-        menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         menu.setTitle(Component.literal(name));
+        menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         minecraft.containerMenu = menu;
         minecraft.connection.send(new ClientboundOpenScreenPacket(menu.containerId, menu.getType(), menu.getTitle()));
         minecraft.initMenu(menu);

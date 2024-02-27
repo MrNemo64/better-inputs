@@ -23,13 +23,14 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 
 public final class PlayerAdapter1_20_R3 extends PlayerAdapter {
 
-    private static final MethodHandle PlayerConnection_connection = JavaAccess.accessFieldGetter(ClassUtil.getField(ServerGamePacketListenerImpl.class, "h"));
+    private static final MethodHandle PlayerConnection_connection = JavaAccess
+        .accessFieldGetter(ClassUtil.getField(ServerCommonPacketListenerImpl.class, false, Connection.class));
 
     private final PlayerNetwork1_20_R3 network;
 
@@ -57,12 +58,12 @@ public final class PlayerAdapter1_20_R3 extends PlayerAdapter {
 
     @Override
     public int createAnvilMenu(String name, ItemStack itemStack) {
-        if(!Bukkit.isPrimaryThread()) {
+        if (!Bukkit.isPrimaryThread()) {
             return CompletableFuture.supplyAsync(() -> createAnvilMenu(name, itemStack), network.packetManager().mainService()).join();
         }
         AnvilMenu menu = new AnvilMenu(minecraft.nextContainerCounter(), minecraft.getInventory(), MinecraftConstant1_20_R3.BETTER_NULL);
-        menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         menu.setTitle(Component.literal(name));
+        menu.getSlot(0).set(CraftItemStack.asNMSCopy(itemStack));
         minecraft.containerMenu = menu;
         minecraft.connection.send(new ClientboundOpenScreenPacket(menu.containerId, menu.getType(), menu.getTitle()));
         minecraft.initMenu(menu);
@@ -107,11 +108,13 @@ public final class PlayerAdapter1_20_R3 extends PlayerAdapter {
     }
 
     public Channel getChannel() {
-        Connection connection = (Connection) JavaAccess.invoke(minecraft.connection, PlayerConnection_connection);
-        if(connection != null) {
-            return connection.channel;
+        Connection connection;
+        try {
+            connection = (Connection) PlayerConnection_connection.invoke(minecraft.connection);
+        } catch (final Throwable e) {
+            throw new IllegalStateException("Unable to get player channel", e);
         }
-        return null;
+        return connection.channel;
     }
 
 }
