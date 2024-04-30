@@ -10,6 +10,7 @@
     <modules>
         <module>bukkit-api</module>
         <module>bukkit-core</module>
+        <module>bukkit-1_20_R4</module>
         <module>bukkit-1_20_R3</module>
         <module>bukkit-1_20_R2</module>
         <module>bukkit-1_20_R1</module>

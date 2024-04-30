@@ -28,7 +28,12 @@
             <version>3.0.0</version>
         </dependency>
         
-        <!-- Bukkit Version Compat (1.16 - 1.20.4) -->
+        <!-- Bukkit Version Compat (1.16 - 1.20.6) -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_20_R4</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>bukkit-1_20_R3</artifactId>
