@@ -3,7 +3,7 @@
     <parent>
         <groupId>me.nemo_64.betterinputs</groupId>
         <artifactId>bukkit-parent</artifactId>
-        <version>0.3.1</version>
+        <version>0.3.2</version>
     </parent>
     <artifactId>bukkit-1_20_R4</artifactId>
 
@@ -40,7 +40,7 @@
             <plugin>
                 <groupId>net.md-5</groupId>
                 <artifactId>specialsource-maven-plugin</artifactId>
-                <version>1.2.2</version>
+                <version>2.0.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
