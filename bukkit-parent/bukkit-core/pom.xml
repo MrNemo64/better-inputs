@@ -3,7 +3,7 @@
     <parent>
         <groupId>me.nemo_64.betterinputs</groupId>
         <artifactId>bukkit-parent</artifactId>
-        <version>0.3.2</version>
+        <version>0.3.3</version>
     </parent>
     <artifactId>bukkit-core</artifactId>
 
@@ -28,7 +28,12 @@
             <version>3.0.0</version>
         </dependency>
         
-        <!-- Bukkit Version Compat (1.16 - 1.20.6) -->
+        <!-- Bukkit Version Compat (1.16 - 1.21) -->
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>bukkit-1_21_R1</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>bukkit-1_20_R4</artifactId>

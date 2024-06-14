@@ -3,13 +3,14 @@
     <parent>
         <groupId>me.nemo_64.betterinputs</groupId>
         <artifactId>parent</artifactId>
-        <version>0.3.2</version>
+        <version>0.3.3</version>
     </parent>
     <artifactId>bukkit-parent</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>bukkit-api</module>
         <module>bukkit-core</module>
+        <module>bukkit-1_21_R1</module>
         <module>bukkit-1_20_R4</module>
         <module>bukkit-1_20_R3</module>
         <module>bukkit-1_20_R2</module>
